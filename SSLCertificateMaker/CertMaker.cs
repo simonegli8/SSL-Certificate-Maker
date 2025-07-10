@@ -287,7 +287,7 @@ namespace SSLCertificateMaker
 		public byte[] GetPfx(string password)
 		{
 			string subject = GetSubjectName();
-			Pkcs12Store pkcs12Store = new Pkcs12Store();
+			Pkcs12Store pkcs12Store = new Pkcs12StoreBuilder().Build();
 			X509CertificateEntry certEntry = new X509CertificateEntry(cert);
 			X509CertificateEntry[] chainEntries = new X509CertificateEntry[] { certEntry }.Concat(chain.Select(c => new X509CertificateEntry(c))).ToArray();
 			foreach (X509CertificateEntry ce in chainEntries)
@@ -368,7 +368,8 @@ namespace SSLCertificateMaker
 			{
 				using (Stream fileStream = File.OpenRead(filePath))
 				{
-					Pkcs12Store pkcs12Store = new Pkcs12Store(fileStream, password == null ? null : password.ToCharArray());
+					Pkcs12Store pkcs12Store = new Pkcs12StoreBuilder().Build();
+					pkcs12Store.Load(fileStream, password == null ? null : password.ToCharArray());
 					foreach (string alias in pkcs12Store.Aliases)
 					{
 						CertificateBundle b = new CertificateBundle();
