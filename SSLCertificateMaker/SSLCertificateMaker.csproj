@@ -11,6 +11,8 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <OutputPath>bin\$(Configuration)\</OutputPath>
         <ApplicationIcon>cert.ico</ApplicationIcon>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <DebugType>embedded</DebugType>
