@@ -8,7 +8,6 @@
         <Copyright>Copyright ©  2023</Copyright>
         <AssemblyVersion>2.2.1.0</AssemblyVersion>
         <FileVersion>2.2.1.0</FileVersion>
-        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <OutputPath>bin\$(Configuration)\</OutputPath>
         <ApplicationIcon>cert.ico</ApplicationIcon>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
