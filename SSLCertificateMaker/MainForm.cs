@@ -81,6 +81,10 @@ namespace SSLCertificateMaker
 						break;
 					}
 			}
+			else
+			{
+				cbIssuerSelect.SelectedIndex = cbIssuerSelect.Items.Count > 1 ? 1 : 0;
+			}
 		}
 
 		private void btnMakeCert_Click(object sender, EventArgs e)
