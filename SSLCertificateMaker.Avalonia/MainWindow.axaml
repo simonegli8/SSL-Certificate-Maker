@@ -132,7 +132,7 @@
 					</ScrollViewer>
 				</TabItem>
 				<TabItem Header="Convert">
-					<Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*">
+					<Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="5" ColumnSpacing="10">
 						<Border Grid.ColumnSpan="2" Margin="0,15">
 							<TextBlock TextWrapping="Wrap">
 								<Run Text="This tool allows you to convert certificates between formats. The supported formats are:" /><LineBreak/>
