@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -104,6 +105,7 @@ namespace SSLCertificateMaker.Avalonia
             MakeCertButton.Click += MakeCertButton_OnClick;
             WebServerPresetButton.Click += WebServerPresetButton_OnClick;
             CaPresetButton.Click += CaPresetButton_OnClick;
+            ConvertButton.Click += Convert;
             KeyUsageEditButton.Click += (sender, args) =>
             {
                 if (ExtendedKeyUsageBox.IsVisible) ExtendedKeyUsageBox.IsVisible = false;
@@ -118,6 +120,23 @@ namespace SSLCertificateMaker.Avalonia
             {
                 PasswordTextBox.PasswordChar = PasswordTextBox.PasswordChar == '\0' ? '•' : '\0';
             };
+            CertificateCombo.DropDownOpened += (_, _) => PopulateConvertDropdown();
+            CertificateCombo.SelectionChanged += (_, args) =>
+            {
+                var item = CertificateCombo.SelectedItem as string;
+                if (item == null)
+                {
+                    ConvertButton.Content = "Convert";
+                } else if (item.EndsWith(".pfx", StringComparison.OrdinalIgnoreCase))
+                {
+                    ConvertButton.Content = "Convert to .cer, .key";
+                }
+                else
+                {
+                    ConvertButton.Content = "Convert to .pfx";
+                }
+            };
+            tabControl.SelectionChanged += (_, _) => SetStatus("");
 
             StatusTextBlock.Text = string.Empty;
             StopProgress();
@@ -201,6 +220,34 @@ namespace SSLCertificateMaker.Avalonia
             }
         }
 
+        private void PopulateConvertDropdown()
+        {
+            var previouslySelected = CertificateCombo.SelectedItem as string;
+            var items = new List<string>();
+
+            foreach (var fi in new DirectoryInfo(CertDirectory).GetFiles())
+            {
+                if (string.Equals(fi.Extension, ".pfx", StringComparison.OrdinalIgnoreCase)) items.Add(fi.Name);
+                else if (string.Equals(fi.Extension, ".key", StringComparison.OrdinalIgnoreCase) && File.Exists(Path.ChangeExtension(fi.FullName, ".cer")))
+                {
+                    items.Add(fi.Name + " & .cer");
+                }
+            }
+
+            items.Sort(StringComparer.OrdinalIgnoreCase);
+
+            CertificateCombo.ItemsSource = items;
+            if (!string.IsNullOrEmpty(previouslySelected) && items.Contains(previouslySelected))
+            {
+                CertificateCombo.SelectedItem = previouslySelected;
+            }
+            else
+            {
+                CertificateCombo.SelectedIndex = items.Count > 1 ? 1 : 0;
+            }
+        }
+
+
         private async void MakeCertButton_OnClick(object? sender, RoutedEventArgs e)
         {
             if (Equals(MakeCertButton.Content, MakeButtonText))
@@ -272,7 +319,7 @@ namespace SSLCertificateMaker.Avalonia
                     }
                     else
                     {
-                        await SetStatus(string.Empty);
+                        //await SetStatus(string.Empty);
                     }
                 }
                 catch (Exception ex)
@@ -294,6 +341,89 @@ namespace SSLCertificateMaker.Avalonia
             }
         }
 
+        public async void Convert(object? sender, RoutedEventArgs e)
+        {
+            var item = CertificateCombo.SelectedItem as string;
+            if (item == null) return;
+
+            item = Regex.Replace(item, @" & \.cer$", "");
+            var extension = Path.GetExtension(item);
+            var sourcePath = Path.Combine(CertDirectory, item);
+            CertificateBundle bundle = null;
+
+            StartProgress();
+            await SetStatus($"Converting {item}…");
+
+            _cts = new CancellationTokenSource();
+
+            try
+            {
+                if (extension == ".pfx")
+                {
+                    // Read pfx
+                    string? password = null;
+                    bool first = true;
+                    while (bundle == null)
+                    {
+                        try
+                        {
+                            bundle = CertificateBundle.LoadFromPfxFile(sourcePath, password);
+                        } catch (ArgumentException)
+                        {
+
+                        }
+                        if (bundle == null)
+                        {
+                            if (!first)
+                            {
+                                if (!await Confirm("Wrong Password", "You've entered a wrong password. Try again?")) return;
+                            }
+                            else first = false;
+                            PasswordPrompt pp = new PasswordPrompt();
+                            password = await pp.ShowDialog<string?>(this);
+                            if (password == null) return;
+                        }
+                    }
+
+                    // write .cer & .key
+                    var fullNameWithoutExtension = Path.Combine(Path.GetDirectoryName(sourcePath), Path.GetFileNameWithoutExtension(sourcePath));
+                    string fileNameCer = fullNameWithoutExtension + ".cer";
+                    if (File.Exists(fileNameCer))
+                    {
+                        if (!await Confirm("Overwrite existing file?", "Output file \"" + fileNameCer + "\" already exists.  Overwrite?")) return;
+                    }
+                    string fileNameKey = fullNameWithoutExtension + ".key";
+                    if (File.Exists(fileNameKey))
+                    {
+                        if (!await Confirm("Overwrite existing file?", "Output file \"" + fileNameKey + "\" already exists.  Overwrite?")) return;
+                    }
+                    File.WriteAllBytes(fileNameCer, bundle.GetPublicCertAsCerFile());
+                    File.WriteAllBytes(fileNameKey, bundle.GetPrivateKeyAsKeyFile());
+
+                    await SetStatus($"Converted to {Path.GetFileName(fileNameCer)} & {Path.GetFileName(fileNameKey)}.");
+                }
+                else
+                {
+                    // .key source
+                    string cerSourcePath = Path.ChangeExtension(sourcePath, ".cer"), keySourcePath = sourcePath;
+                    bundle = CertificateBundle.LoadFromCerAndKeyFiles(cerSourcePath, keySourcePath);
+
+                    string pfxFileName = Path.ChangeExtension(sourcePath, ".pfx");
+                    if (File.Exists(pfxFileName))
+                    {
+                        if (!await Confirm("Overwrite existing file?", "Output file \"" + pfxFileName + "\" already exists.  Overwrite?")) return;
+                    }
+                    File.WriteAllBytes(pfxFileName, bundle.GetPfx(null));
+
+                    await SetStatus($"Converted to {Path.GetFileName(pfxFileName)}.");
+                }
+            }
+            finally
+            {
+                StopProgress();
+            }
+
+        }
         private bool LooksLikeCa(MakeCertArgs args)
         {
             if ((args.KeyUsage & 6) != 6)
@@ -378,8 +508,15 @@ namespace SSLCertificateMaker.Avalonia
                     issuerBundle = CertificateBundle.LoadFromPfxFile(issuerFile, null);
                     if (issuerBundle == null)
                     {
-                        await SetStatus("Unable to load CA .pfx file (password-protected pfx is not supported in this UI).");
-                        return;
+                        var passwordPrompt = new PasswordPrompt();
+                        var password = await passwordPrompt.ShowDialog<string?>(this);
+                        issuerBundle = CertificateBundle.LoadFromPfxFile(issuerFile, password);
+
+                        if (issuerBundle == null)
+                        {
+                            await SetStatus("Unable to load CA .pfx file (wrong password).");
+                            return;
+                        }
                     }
                 }
                 else

@@ -11,8 +11,8 @@
         MinWidth="520" MinHeight="580">
 	
 	<dialogHost:DialogHost Identifier="RootDialog" CloseOnClickAway="True">
-		<Grid RowDefinitions="*,Auto" RowSpacing="3" ColumnSpacing="3">
-			<TabControl Grid.Row="0">
+		<Grid RowDefinitions="*,Auto" RowSpacing="5" ColumnSpacing="5">
+			<TabControl Grid.Row="0" x:Name="tabControl">
 				<TabItem Header="New Certificate">
 					<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 						<Grid ColumnDefinitions="Auto,*" Margin="8" RowSpacing="3" ColumnSpacing="3">
@@ -118,7 +118,7 @@
 							<TextBlock Grid.Row="9" Grid.Column="0" Text="Pfx Password:" VerticalAlignment="Center" />
 							<Grid Grid.Row="9" Grid.Column="1" ColumnDefinitions="*,Auto">
 								<TextBox Grid.Column="0" x:Name="PasswordTextBox" PasswordChar="•" HorizontalAlignment="Stretch" />
-								<Button Grid.Column="1" Content="👁" x:Name="ShowPassword" Margin="8,0,0,0"/>
+								<Button Grid.Column="1" Content="👁" x:Name="ShowPassword" Margin="8,0,0,0" />
 							</Grid>
 
 							<!-- Action row -->
@@ -132,7 +132,27 @@
 					</ScrollViewer>
 				</TabItem>
 				<TabItem Header="Convert">
-					
+					<Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*">
+						<Border Grid.ColumnSpan="2" Margin="0,15">
+							<TextBlock TextWrapping="Wrap">
+								<Run Text="This tool allows you to convert certificates between formats. The supported formats are:" /><LineBreak/>
+								<LineBreak/>
+								<Run Text="1) .pfx (passwords are not currently supported)" /><LineBreak/>
+								<Run Text="2) .cer and .key (both files must exist, names differing only in their extensions)" /><LineBreak/>
+								<LineBreak/>
+								<Run Text="The files must exist in the Documents/SSL-Certificates in order to be found by this program." />
+							</TextBlock>
+						</Border>
+						<TextBlock Grid.Row="1" Grid.Column="0" Text="Certificate:" />
+						<ComboBox Grid.Row="1" Grid.Column="1" x:Name="CertificateCombo" HorizontalAlignment="Stretch" />
+						<!-- Action row -->
+						<Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Padding="4" HorizontalAlignment="Stretch" Margin="10">
+							<StackPanel Spacing="10">
+								<TextBlock Text="The converted certifiate will be saved in your Documents/SSL-Certificates folder" />
+								<Button x:Name="ConvertButton" Content="Convert" HorizontalAlignment="Right" />
+							</StackPanel>
+						</Border>
+					</Grid>
 				</TabItem>
 			</TabControl>
 
