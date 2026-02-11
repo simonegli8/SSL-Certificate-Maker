@@ -11,7 +11,7 @@ If you need a certificate for a public web server, this is not the tool for you.
 
 ## Usage
 
-To install SSL-Certificate-Maker, install the [.NET 10 SDK](https://get.dot.net/10.0) and tun the shell command:
+To install SSL-Certificate-Maker, install the [.NET 10 SDK](https://get.dot.net/10.0) and run the shell command:
 
 ```
 dotnet tool install -g SSLCertificateMaker
