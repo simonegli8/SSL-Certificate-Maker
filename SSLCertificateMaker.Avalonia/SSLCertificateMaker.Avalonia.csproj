@@ -6,7 +6,25 @@
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+		<AssemblyTitle>SSLCertificateMaker</AssemblyTitle>
+		<Product>SSLCertificateMaker</Product>
+		<Copyright>Copyright © 2026</Copyright>
+		<AssemblyVersion>3.0.0.0</AssemblyVersion>
+		<FileVersion>3.0.0.0</FileVersion>
+		<OutputPath>bin\$(Configuration)\</OutputPath>
+		<ApplicationIcon>cert.ico</ApplicationIcon>
 	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="pen-white.png" />
+		<None Remove="pen.png" />
+		<None Remove="pen.svg" />
+	</ItemGroup>
+	<ItemGroup>
+		<AvaloniaResource Include="pen-white.png" />
+		<AvaloniaResource Include="pen.png" />
+		<AvaloniaResource Include="pen.svg" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="11.3.11" />
@@ -26,5 +44,13 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\SSLCertificateMaker.Library\SSLCertificateMaker.Library.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <AvaloniaResource Remove="cert.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="cert.ico" />
 	</ItemGroup>
 </Project>

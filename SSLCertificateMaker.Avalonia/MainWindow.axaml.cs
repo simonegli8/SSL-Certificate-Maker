@@ -1,14 +1,19 @@
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using Avalonia.Styling;
+using Avalonia.Threading;
+using AvaloniaDialogs.Views;
+using Org.BouncyCastle.Asn1.X509;
+using SSLCertificateMaker;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Avalonia.Threading;
-using Org.BouncyCastle.Asn1.X509;
-using SSLCertificateMaker;
 
 namespace SSLCertificateMaker.Avalonia
 {
@@ -23,7 +28,7 @@ namespace SSLCertificateMaker.Avalonia
 
         private CancellationTokenSource? _cts;
 
-        private readonly MultiSelectIntItem[] _keyUsageOptions = new[]
+        private readonly MultiSelectIntItem[] KeyUsageOptions = new[]
         {
             new MultiSelectIntItem("EncipherOnly (1)", KeyUsage.EncipherOnly),
             new MultiSelectIntItem("CRL Signing (2)", KeyUsage.CrlSign),
@@ -54,9 +59,10 @@ namespace SSLCertificateMaker.Avalonia
 
         static MainWindow()
         {
-            var exeDir = new DirectoryInfo(AppContext.BaseDirectory);
-            CaDirectory = new DirectoryInfo(Path.Combine(exeDir.FullName, "CA")).FullName;
-            CertDirectory = new DirectoryInfo(Path.Combine(exeDir.FullName, "CERT")).FullName;
+            //var exeDir = new DirectoryInfo(AppContext.BaseDirectory);
+            var documentsDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            CertDirectory = Path.Combine(documentsDir, "SSL-Certificates");
+            CaDirectory = Path.Combine(CertDirectory, "Certificate Authority");
             Directory.CreateDirectory(CaDirectory);
             Directory.CreateDirectory(CertDirectory);
         }
@@ -70,7 +76,8 @@ namespace SSLCertificateMaker.Avalonia
 
         private void InitializeUi()
         {
-            Title += " " + typeof(MainWindow).Assembly.GetName().Version;
+            var version = typeof(MainWindow).Assembly.GetName().Version;
+            Title += $" {version.Major}.{version.Minor}";
 
             // Dates
             ValidFromDatePicker.SelectedDate = DateTime.Today.AddYears(-10);
@@ -87,27 +94,78 @@ namespace SSLCertificateMaker.Avalonia
             UpdatePasswordEnabled();
 
             // Key usage lists
-            KeyUsageListBox.ItemsSource = _keyUsageOptions;
+            KeyUsageListBox.ItemsSource = KeyUsageOptions;
             ExtendedKeyUsageListBox.ItemsSource = ExtendedKeyUsageOptions;
+            KeyUsageListBox.SelectionChanged += KeyUsageSelectionChanged;
+            ExtendedKeyUsageListBox.SelectionChanged += KeyUsageSelectionChanged;
 
             // Buttons
             MakeCertButton.Content = MakeButtonText;
             MakeCertButton.Click += MakeCertButton_OnClick;
             WebServerPresetButton.Click += WebServerPresetButton_OnClick;
             CaPresetButton.Click += CaPresetButton_OnClick;
+            KeyUsageEditButton.Click += (sender, args) =>
+            {
+                if (ExtendedKeyUsageBox.IsVisible) ExtendedKeyUsageBox.IsVisible = false;
+                KeyUsageBox.IsVisible = !KeyUsageBox.IsVisible;
+            };
+            ExtendedKeyUsageEditButton.Click += (sender, args) =>
+            {
+                if (KeyUsageBox.IsVisible) KeyUsageBox.IsVisible = false;
+                ExtendedKeyUsageBox.IsVisible = !ExtendedKeyUsageBox.IsVisible;
+            };
+            ShowPassword.Click += (_, _) =>
+            {
+                PasswordTextBox.PasswordChar = PasswordTextBox.PasswordChar == '\0' ? '•' : '\0';
+            };
 
             StatusTextBlock.Text = string.Empty;
             StopProgress();
 
             ApplyWebServerPreset();
             PopulateIssuerDropdown();
+
+            Application.Current!.PropertyChanged += SetTheme;
+            SetTheme();
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Application.Current!.PropertyChanged -= SetTheme;
+        }
+        private void KeyUsageSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender == KeyUsageListBox) {
+                txtKeyUsage.Text = string.Join(", ", KeyUsageListBox.SelectedItems
+                    .OfType<MultiSelectIntItem>()
+                    .Select(item => item.Key));
+            }
+            else txtExtendedKeyUsage.Text = string.Join(", ", ExtendedKeyUsageListBox.SelectedItems
+                .OfType<MultiSelectKeyPurposeItem>()
+                .Select(item => item.Key));
+        }
         private void OutputTypeComboBox_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
             UpdatePasswordEnabled();
         }
 
+        private void SetTheme(object sender = null, AvaloniaPropertyChangedEventArgs e = null)
+        {
+            if (e == null || e.Property.Name == nameof(Application.ActualThemeVariant))
+            {
+
+                var isDark = Application.Current?.ActualThemeVariant == ThemeVariant.Dark;
+                if (isDark)
+                {
+                    PenImage1.Source = PenImage2.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/pen-white.png")));
+                }
+                else
+                {
+                    PenImage1.Source = PenImage2.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/pen.png")));
+                }
+            }
+        }
         private void UpdatePasswordEnabled()
         {
             if (OutputTypeComboBox.SelectedItem is string s)
@@ -150,14 +208,14 @@ namespace SSLCertificateMaker.Avalonia
                 var domains = GetCleanDomainArray();
                 if (domains.Length == 0)
                 {
-                    SetStatus("No domain names were entered (at least 'localhost' is recommended).");
+                    await SetStatus("No domain names were entered (at least 'localhost' is recommended).");
                     return;
                 }
 
                 if (KeyStrengthComboBox.SelectedItem is not string keyStrengthStr ||
                     !int.TryParse(keyStrengthStr, out var keyStrength))
                 {
-                    SetStatus("Invalid key strength.");
+                    await SetStatus("Invalid key strength.");
                     return;
                 }
 
@@ -192,16 +250,16 @@ namespace SSLCertificateMaker.Avalonia
                     OutputPath = CertDirectory
                 };
 
-                if (LooksLikeCa(args))
+                /*if (LooksLikeCa(args))
                 {
                     // In WinForms this was user-confirmed; here we automatically place CAs into the CA folder.
                     args.OutputPath = CaDirectory;
-                }
+                }*/
 
                 MakeCertButton.Content = CancelButtonText;
 
                 StartProgress();
-                SetStatus("Generating certificate…");
+                await SetStatus("Generating certificate…");
 
                 _cts = new CancellationTokenSource();
 
@@ -210,16 +268,16 @@ namespace SSLCertificateMaker.Avalonia
                     await Task.Run(() => MakeCertificate(args, _cts.Token));
                     if (_cts.IsCancellationRequested)
                     {
-                        SetStatus("Aborted");
+                        await SetStatus("Aborted");
                     }
                     else
                     {
-                        SetStatus(string.Empty);
+                        await SetStatus(string.Empty);
                     }
                 }
                 catch (Exception ex)
                 {
-                    SetStatus("An error occurred while generating the certificate.");
+                    await SetStatus("An error occurred while generating the certificate.");
                     // Optionally log ex.ToString() somewhere
                 }
                 finally
@@ -254,12 +312,27 @@ namespace SSLCertificateMaker.Avalonia
                 .ToArray();
         }
 
-        private void MakeCertificate(MakeCertArgs args, CancellationToken token)
+        public async Task<bool> Confirm(string title, string message)
+        {
+            return (await Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                var dialog = new TwofoldDialog
+                {
+                    Name = title,
+                    Message = message,
+                    PositiveText = "Ok",
+                    NegativeText = "Cancel"
+                };
+                return await dialog.ShowAsync();
+            })).Value;
+        }
+
+        private async Task MakeCertificate(MakeCertArgs args, CancellationToken token)
         {
             Directory.CreateDirectory(CaDirectory);
             Directory.CreateDirectory(CertDirectory);
 
-            SetStatus("Checking for existing certificate");
+            await SetStatus("Checking for existing certificate");
 
             var safeFileName = Path.Combine(args.OutputPath, SafeFileName(args.domains[0]));
 
@@ -267,28 +340,28 @@ namespace SSLCertificateMaker.Avalonia
             {
                 if (File.Exists(safeFileName + ".cer"))
                 {
-                    SetStatus("File already exists: " + safeFileName + ".cer");
-                    return;
+                    await SetStatus("File already exists: " + safeFileName + ".cer");
+                    if (!await Confirm("File Already Exists", $"File already exists: {safeFileName}.cer. Do you want to overwrite it?")) return;
                 }
                 if (File.Exists(safeFileName + ".key"))
                 {
-                    SetStatus("File already exists: " + safeFileName + ".key");
-                    return;
+                    await SetStatus("File already exists: " + safeFileName + ".key");
+                    if (!await Confirm("File Already Exists", $"File already exists: {safeFileName}.key. Do you want to overwrite it?")) return;
                 }
             }
             else
             {
                 if (File.Exists(safeFileName + ".pfx"))
                 {
-                    SetStatus("File already exists: " + safeFileName + ".pfx");
-                    return;
+                    await SetStatus("File already exists: " + safeFileName + ".pfx");
+                    if (!await Confirm("File Already Exists", $"File already exists: {safeFileName}.pfx. Do you want to overwrite it?")) return;
                 }
             }
 
             if (token.IsCancellationRequested)
                 return;
 
-            SetStatus("Generating certificate");
+            await SetStatus("Generating certificate");
 
             CertificateBundle certBundle;
             if (args.issuer == SelfSignedLabel)
@@ -305,7 +378,7 @@ namespace SSLCertificateMaker.Avalonia
                     issuerBundle = CertificateBundle.LoadFromPfxFile(issuerFile, null);
                     if (issuerBundle == null)
                     {
-                        SetStatus("Unable to load CA .pfx file (password-protected pfx is not supported in this UI).");
+                        await SetStatus("Unable to load CA .pfx file (password-protected pfx is not supported in this UI).");
                         return;
                     }
                 }
@@ -323,17 +396,26 @@ namespace SSLCertificateMaker.Avalonia
             if (token.IsCancellationRequested)
                 return;
 
-            SetStatus("Saving certificate to disk");
+            await SetStatus("Saving certificate to disk");
 
             if (args.saveCerAndKey)
             {
                 File.WriteAllBytes(safeFileName + ".cer", certBundle.GetPublicCertAsCerFile());
                 File.WriteAllBytes(safeFileName + ".key", certBundle.GetPrivateKeyAsKeyFile());
+                if (LooksLikeCa(args))
+                {
+                    File.Copy(safeFileName + ".cer", Path.Combine(CaDirectory, Path.GetFileName(safeFileName + ".cer")));
+                    File.Copy(safeFileName + ".key", Path.Combine(CaDirectory, Path.GetFileName(safeFileName + ".key")));
+                }
             }
             else
             {
                 var password = string.IsNullOrEmpty(args.password) ? null : args.password;
                 File.WriteAllBytes(safeFileName + ".pfx", certBundle.GetPfx(password));
+                if (LooksLikeCa(args))
+                {
+                    File.Copy(safeFileName + ".pfx", Path.Combine(CaDirectory, Path.GetFileName(safeFileName + ".pfx")));
+                }
             }
         }
 
@@ -341,8 +423,7 @@ namespace SSLCertificateMaker.Avalonia
         {
             var illegalChars = new HashSet<char>(new[]
             {
-                '#','%','&','{','}','\\','<','>','*','?','/',' ','$','!','\'','"'
-                ,':','@'
+                '#','%','&','{','}','\\','<','>','*','?','/',' ','$','!','\'','"',':','@'
             });
             return new string(str.Select(c => illegalChars.Contains(c) ? '_' : c).ToArray());
         }
@@ -360,9 +441,9 @@ namespace SSLCertificateMaker.Avalonia
             PopulateIssuerDropdown();
         }
 
-        private void SetStatus(string str)
+        private async Task SetStatus(string str)
         {
-            Dispatcher.UIThread.Post(() => { StatusTextBlock.Text = str; });
+            await Dispatcher.UIThread.InvokeAsync(() => { StatusTextBlock.Text = str; });
         }
 
         private void WebServerPresetButton_OnClick(object? sender, RoutedEventArgs e)
@@ -391,7 +472,7 @@ namespace SSLCertificateMaker.Avalonia
 
         private void SetKeyUsageSelection(Func<MultiSelectIntItem, bool> selector)
         {
-            KeyUsageListBox.SelectedItems = _keyUsageOptions.Where(selector).ToList();
+            KeyUsageListBox.SelectedItems = KeyUsageOptions.Where(selector).ToList();
         }
 
         private void SetExtendedKeyUsageSelection(Func<MultiSelectKeyPurposeItem, bool> selector)

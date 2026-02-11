@@ -1,10 +1,21 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="SSLCertificateMaker.Avalonia.App"
+  			 xmlns:dialogHostAvalonia="using:DialogHostAvalonia"
+			 xmlns:sty="using:FluentAvalonia.Styling"
+	         x:Class="SSLCertificateMaker.Avalonia.App"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+	<!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
-    <Application.Styles>
-        <FluentTheme />
-    </Application.Styles>
+	<Application.Styles>
+		<FluentTheme />
+		<sty:FluentAvaloniaTheme PreferUserAccentColor="True" />
+		<!-- Apply Inter globally -->
+		<!--<Style Selector=":root">
+		<Setter Property="FontFamily" Value="avares://Avalonia.Fonts.Inter/Inter#Inter" />
+		</Style>-->
+		<Style Selector="Control">
+			<Setter Property="UseLayoutRounding" Value="True" />
+		</Style>
+		<dialogHostAvalonia:DialogHostStyles />
+	</Application.Styles>
 </Application>
