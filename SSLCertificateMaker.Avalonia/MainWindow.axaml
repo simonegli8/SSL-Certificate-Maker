@@ -2,8 +2,120 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		xmlns:cm="using:SSLCertificateMaker"
+        mc:Ignorable="d"
         x:Class="SSLCertificateMaker.Avalonia.MainWindow"
-        Title="SSLCertificateMaker.Avalonia">
-    Welcome to Avalonia!
+        Title="SSL Certificate Maker"
+        Width="600" Height="600"
+        MinWidth="520" MinHeight="580">
+
+	<Grid RowDefinitions="*,Auto" RowSpacing="3" ColumnSpacing="3">
+		<TabControl Grid.Row="0">
+			<TabItem Header="New Certificate">
+				<Grid RowDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto"
+					  ColumnDefinitions="Auto,*" Margin="8" RowSpacing="3" ColumnSpacing="3">
+
+					<!-- Header -->
+					<TextBlock Grid.Row="0" Grid.Column="0" Text="Certificate Authority:" />
+					<ComboBox Grid.Row="0" Grid.Column="1" x:Name="IssuerCombo" HorizontalAlignment="Stretch" />
+
+					<!-- Main content -->
+					<!-- Domains -->
+					<StackPanel Grid.Row="1" Grid.Column="0">
+						<TextBlock Text="Domain Names:" />
+						<TextBlock TextWrapping="Wrap" FontSize="12" Width="120"
+							Text="One per line. First line is Subject Name; others are Subject Alternative Names." />
+					</StackPanel>
+
+					<ScrollViewer Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+						<TextBox x:Name="DomainsTextBox" AcceptsReturn="True"
+						TextWrapping="Wrap" MinHeight="100" Text="localhost" />
+					</ScrollViewer>
+
+					<!-- Presets -->
+					<TextBlock Grid.Row="2" Grid.Column="0" Text="Presets:" />
+					<StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+						<Button x:Name="WebServerPresetButton" Content="Web Server" />
+						<Button x:Name="CaPresetButton" Content="Certificate Authority" />
+					</StackPanel>
+
+					<!-- Key Usage -->
+					<TextBlock Grid.Row="3" Grid.Column="0" Text="Key Usage:" />
+					<StackPanel Grid.Row="3" Grid.Column="1">
+						<StackPanel Orientation="Vertical">
+							<Button Content="Edit" />
+							<TextBlock x:Name="txtKeyUsage" />
+						</StackPanel>
+						<ListBox x:Name="KeyUsageListBox" SelectionMode="Multiple" IsVisible="false">
+							<ListBox.ItemTemplate>
+								<DataTemplate x:DataType="cm:MultiSelectKeyPurposeItem">
+									<CheckBox Content="{Binding Key}"
+											  IsChecked="{Binding IsSelected, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+					</StackPanel>
+
+					<!-- Extended Key Usage -->
+					<TextBlock Grid.Row="4" Grid.Column="0" Text="Extended Key Usage:" />
+					<StackPanel Grid.Row="4" Grid.Column="1">
+						<StackPanel Orientation="Vertical">
+							<Button Content="Edit" />
+							<TextBlock x:Name="txtExtendedKeyUsage" />
+						</StackPanel>
+						<ListBox x:Name="ExtendedKeyUsageListBox" SelectionMode="Multiple" IsVisible="false">
+							<ListBox.ItemTemplate>
+								<DataTemplate x:DataType="cm:MultiSelectIntItem">
+									<CheckBox Content="{Binding Key}"
+										IsChecked="{Binding IsSelected, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+						</ListBox>
+					</StackPanel>
+				
+					<!-- Dates -->
+					<TextBlock Grid.Row="5" Grid.Column="0" Text="Valid From:" />
+					<DatePicker Grid.Row="5" Grid.Column="1" x:Name="ValidFromDatePicker" />
+
+					<TextBlock Grid.Row="6" Grid.Column="0" Text="Valid Until:" />
+					<DatePicker Grid.Row="6" Grid.Column="1" x:Name="ValidToDatePicker" />
+
+					<!-- Key strength -->
+					<StackPanel Grid.Row="7" Grid.Column="0"
+								Orientation="Horizontal"
+								HorizontalAlignment="Right"
+								Margin="0,0,4,0">
+						<TextBlock Text="Key Strength:" />
+					</StackPanel>
+					<StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal" Spacing="6">
+						<ComboBox x:Name="KeyStrengthComboBox" Width="90" />
+						<TextBlock Text="Bits (2048 builds fast, 4096 is more secure)" TextWrapping="Wrap" VerticalAlignment="Center" />
+					</StackPanel>
+
+					<!-- Output -->
+					<TextBlock Grid.Row="8" Grid.Column="0" Text="Output Type:" />
+					<ComboBox Grid.Row="8" Grid.Column="1" x:Name="OutputTypeComboBox" Width="120" />
+
+					<!--Password -->
+					<TextBlock Grid.Row="9" Grid.Column="0" Text="Pfx Password:" />
+					<TextBox Grid.Row="9" Grid.Column="1" x:Name="PasswordTextBox" PasswordChar="*" HorizontalAlignment="Stretch" />
+
+					<!-- Action row -->
+					<Border Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2" Padding="4"
+						Background="{DynamicResource SystemControlBackgroundBaseLowBrush}"
+						BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+						HorizontalAlignment="Stretch">
+						<Button x:Name="MakeCertButton" Content="Make Certificate" HorizontalAlignment="Right" />
+					</Border>
+				</Grid>
+			</TabItem>
+		</TabControl>
+
+		<!-- Status bar -->
+		<DockPanel Grid.Row="1" LastChildFill="True">
+			<ProgressBar x:Name="ProgressBar" Width="120" Height="16"
+				IsIndeterminate="False" />
+			<TextBlock x:Name="StatusTextBlock" VerticalAlignment="Center" Text="Ready" />
+		</DockPanel>
+	</Grid>
 </Window>
