@@ -127,7 +127,8 @@ namespace SSLCertificateMaker.Avalonia
                 if (item == null)
                 {
                     ConvertButton.Content = "Convert";
-                } else if (item.EndsWith(".pfx", StringComparison.OrdinalIgnoreCase))
+                }
+                else if (item.EndsWith(".pfx", StringComparison.OrdinalIgnoreCase))
                 {
                     ConvertButton.Content = "Convert to .cer, .key";
                 }
@@ -155,7 +156,8 @@ namespace SSLCertificateMaker.Avalonia
         }
         private void KeyUsageSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (sender == KeyUsageListBox) {
+            if (sender == KeyUsageListBox)
+            {
                 txtKeyUsage.Text = string.Join(", ", KeyUsageListBox.SelectedItems
                     .OfType<MultiSelectIntItem>()
                     .Select(item => item.Key));
@@ -368,7 +370,8 @@ namespace SSLCertificateMaker.Avalonia
                         try
                         {
                             bundle = CertificateBundle.LoadFromPfxFile(sourcePath, password);
-                        } catch (ArgumentException)
+                        }
+                        catch (ArgumentException)
                         {
 
                         }
@@ -522,7 +525,7 @@ namespace SSLCertificateMaker.Avalonia
                 else
                 {
                     var cerFile = issuerFile.EndsWith(".key", StringComparison.OrdinalIgnoreCase)
-                        ? issuerFile[..^4] + ".cer"
+                        ? Path.ChangeExtension(issuerFile, ".cer")
                         : null;
                     issuerBundle = CertificateBundle.LoadFromCerAndKeyFiles(cerFile, issuerFile);
                 }
