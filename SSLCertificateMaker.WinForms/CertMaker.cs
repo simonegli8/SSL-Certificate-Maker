@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Org.BouncyCastle.Asn1;
@@ -97,7 +98,7 @@ namespace SSLCertificateMaker
 			if (!isCA || args.domains.Length > 1)
 			{
 				// Add SANs (Subject Alternative Names)
-				GeneralName[] names = args.domains.Select(domain => new GeneralName(GeneralName.DnsName, domain)).ToArray();
+				GeneralName[] names = args.domains.Select(domain => new GeneralName(GetGeneralNameType(domain), domain)).ToArray();
 				GeneralNames subjectAltName = new GeneralNames(names);
 				certGenerator.AddExtension(X509Extensions.SubjectAlternativeName, false, subjectAltName);
 			}
@@ -112,6 +113,22 @@ namespace SSLCertificateMaker
 			certGenerator.AddExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(isCA));
 
 			return certGenerator.Generate(signatureFactory);
+		}
+		/// <summary>
+		/// Returns <c>GeneralName.IPAddress</c> if the <c>domain</c> is an IPv4 or IPv6 address, otherwise returns <c>GeneralName.DnsName</c>.
+		/// </summary>
+		/// <param name="domain"></param>
+		/// <returns></returns>
+		private static int GetGeneralNameType(string domain)
+		{
+			if(IPAddress.TryParse(domain, out IPAddress ip))
+			{
+				if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+					return GeneralName.IPAddress;
+				else if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+					return GeneralName.IPAddress;
+			}
+			return GeneralName.DnsName;
 		}
 
 		private static bool ValidateCert(X509Certificate cert, ICipherParameters pubKey)
