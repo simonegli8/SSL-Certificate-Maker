@@ -23,7 +23,7 @@ and then run it by executing
 sslcertmaker
 ```
 
-The created certificates will be stored in you `Documents/SSL-Certificates` folder.
+The created certificates will be stored in your `Documents/SSL-Certificates` folder.
 
 For basic usage, you can simply click the `Make Certificate` button and find a new `localhost.pfx` file created in your `Documents/SSL-Certificates` directory.  Nobody likes renewing self-signed certificates, so by default this program uses an expiration date that is 500 years after you started it.
 
