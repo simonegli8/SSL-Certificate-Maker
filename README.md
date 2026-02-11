@@ -53,6 +53,6 @@ In this screenshot, I have instructed my computer to trust "My Very Trustworthy 
 
 ## Converting .cer and .key to .pfx, and vice-versa
 
-This program also includes the ability to convert certificates and private keys between the `.cer and .key` and `.pfx` formats, via the Convert menu at the top left corner.
+This program also includes the ability to convert certificates and private keys between the `.cer and .key` and `.pfx` formats, via the Convert tab at the top.
 
 ![Screenshot of Convert Certificates Panel](https://github.com/simonegli8/SSL-Certificate-Maker/blob/master/Resources/Screenshot.Convert.png?raw=true)
