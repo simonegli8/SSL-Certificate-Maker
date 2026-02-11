@@ -8,6 +8,8 @@
 *.user
 *.userosscache
 *.sln.docstates
+NugetApiKey.txt
+nupkg/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

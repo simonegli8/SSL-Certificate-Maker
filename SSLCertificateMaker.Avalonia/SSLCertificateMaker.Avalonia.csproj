@@ -80,6 +80,10 @@
 	<ItemGroup>
 	  <Content Include="cert.ico" />
 	</ItemGroup>
+	
+	<ItemGroup>
+		<None Include="..\README.md" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
 
 	<ItemGroup>
 	  <Compile Update="PasswordPrompt.axaml.cs">
