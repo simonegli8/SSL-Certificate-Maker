@@ -1,7 +1,7 @@
 # SSL-Certificate-Maker
-A graphical tool for generating SSL certificates without any prior knowledge or command line tools.
+A cross platform GUI tool for generating SSL certificates without any prior knowledge or command line tools.
 
-![Screenshot](https://i.imgur.com/9IE0R1l.png)
+![Screenshot](https://github.com/simonegli8/SSL-Certificate-Maker/blob/master/Resources/Screenshot.MainWindow.png?raw=true)
 
 ## Purpose
 
@@ -11,9 +11,21 @@ If you need a certificate for a public web server, this is not the tool for you.
 
 ## Usage
 
-[Download SSLCertificateMaker.exe from the releases tab](https://github.com/bp2008/SSL-Certificate-Maker/releases) and run the executable in a location where you have write permission, such as in a "Certificates" directory on your desktop.
+To install SSL-Certificate-Maker, install the [.NET 10 SDK](https://get.dot.net/10.0) and tun the shell command:
 
-For basic usage, you can simply click the `Make Certificate` button and find a new `localhost.pfx` file created in the `CERT` subdirectory.  Nobody likes renewing self-signed certificates, so by default this program uses an expiration date that is 500 years after you started it.
+```
+dotnet tool install -g SSLCertificateMaker
+```
+
+and then run it by executing
+
+```
+sslcertmaker
+```
+
+The created certificates will be stored in you `Documents/SSL-Certificates` folder.
+
+For basic usage, you can simply click the `Make Certificate` button and find a new `localhost.pfx` file created in your `Documents/SSL-Certificates` directory.  Nobody likes renewing self-signed certificates, so by default this program uses an expiration date that is 500 years after you started it.
 
 ## Trusting a Certificate
 
@@ -33,7 +45,7 @@ If you want to use the certificate with IIS on Windows, you need to install both
 
 When you need to create many trusted certificates, it can be useful to sign them all with a common root certificate known as a **Certificate Authority** or "CA".  This way, you can have your operating system trust your CA, then any certificate your CA signs will automatically be trusted.
 
-You can create a CA with this app by using the `CA` preset button before you click `Make Certificate`.  CA certificates are placed in the `CA` subfolder and become selectable in the `Certificate Authority` dropdown list.  Choose your CA from the Certificate Authority dropdown list to sign new certificates with your CA.
+You can create a CA with this app by using the `CA` preset button before you click `Make Certificate`.  CA certificates are placed in the `Documents/SSL-Certificates/CertificateAuthority` subfolder and become selectable in the `Certificate Authority` dropdown list.  Choose your CA from the Certificate Authority dropdown list to sign new certificates with your CA.
 
 In this screenshot, I have instructed my computer to trust "My Very Trustworthy Certificate Authority".  Then I signed another certificate "MyESXiServer" with it, and now both are trusted.
 
@@ -43,4 +55,4 @@ In this screenshot, I have instructed my computer to trust "My Very Trustworthy 
 
 This program also includes the ability to convert certificates and private keys between the `.cer and .key` and `.pfx` formats, via the Convert menu at the top left corner.
 
-![Screenshot of Convert Certificates Panel](https://i.imgur.com/1jiXaJc.png)
+![Screenshot of Convert Certificates Panel](https://github.com/simonegli8/SSL-Certificate-Maker/blob/master/Resources/Screenshot.Convert.png?raw=true)

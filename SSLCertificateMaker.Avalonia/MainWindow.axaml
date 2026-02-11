@@ -137,7 +137,7 @@
 							<TextBlock TextWrapping="Wrap">
 								<Run Text="This tool allows you to convert certificates between formats. The supported formats are:" /><LineBreak/>
 								<LineBreak/>
-								<Run Text="1) .pfx (passwords are not currently supported)" /><LineBreak/>
+								<Run Text="1) .pfx" /><LineBreak/>
 								<Run Text="2) .cer and .key (both files must exist, names differing only in their extensions)" /><LineBreak/>
 								<LineBreak/>
 								<Run Text="The files must exist in the Documents/SSL-Certificates in order to be found by this program." />

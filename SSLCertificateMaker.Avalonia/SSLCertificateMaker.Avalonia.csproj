@@ -36,7 +36,7 @@
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 		<PackAsTool>true</PackAsTool>
-		<ToolCommandName>bibmark</ToolCommandName>
+		<ToolCommandName>sslcertmaker</ToolCommandName>
 		<PackageOutputPath>../nupkg</PackageOutputPath>
 		<IncludeContentInPack>false</IncludeContentInPack>
 		<IncludeBuildOutput>true</IncludeBuildOutput>

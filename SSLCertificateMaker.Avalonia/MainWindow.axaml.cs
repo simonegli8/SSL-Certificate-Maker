@@ -63,7 +63,7 @@ namespace SSLCertificateMaker.Avalonia
             //var exeDir = new DirectoryInfo(AppContext.BaseDirectory);
             var documentsDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             CertDirectory = Path.Combine(documentsDir, "SSL-Certificates");
-            CaDirectory = Path.Combine(CertDirectory, "Certificate Authority");
+            CaDirectory = Path.Combine(CertDirectory, "CertificateAuthority");
             Directory.CreateDirectory(CaDirectory);
             Directory.CreateDirectory(CertDirectory);
         }
