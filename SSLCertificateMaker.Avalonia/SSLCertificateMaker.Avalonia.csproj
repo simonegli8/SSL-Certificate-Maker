@@ -74,20 +74,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <AvaloniaResource Remove="cert.ico" />
+		<AvaloniaResource Remove="cert.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="cert.ico" />
+		<Content Include="cert.ico" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<None Include="..\README.md" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="PasswordPrompt.axaml.cs">
-	    <DependentUpon>PasswordPrompt.axaml</DependentUpon>
-	  </Compile>
+		<Compile Update="PasswordPrompt.axaml.cs">
+			<DependentUpon>PasswordPrompt.axaml</DependentUpon>
+		</Compile>
 	</ItemGroup>
 </Project>
