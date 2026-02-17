@@ -41,6 +41,7 @@
 		<PackageOutputPath>../nupkg</PackageOutputPath>
 		<IncludeContentInPack>false</IncludeContentInPack>
 		<IncludeBuildOutput>true</IncludeBuildOutput>
+		<Configurations>Debug;Release;Test;Test</Configurations>
 
 	</PropertyGroup>
 	<ItemGroup>
