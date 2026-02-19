@@ -124,7 +124,7 @@
 							<!-- Action row -->
 							<Border Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="2" Padding="4" HorizontalAlignment="Stretch" Margin="10">
 								<StackPanel Spacing="10">
-									<TextBlock Text="The certifiate will be saved in your Documents/SSL-Certificates folder" />
+									<!--<TextBlock Text="The certifiate will be saved in your Documents/SSL-Certificates folder" />-->
 									<Button x:Name="MakeCertButton" Content="Make Certificate" HorizontalAlignment="Right" />
 								</StackPanel>
 							</Border>

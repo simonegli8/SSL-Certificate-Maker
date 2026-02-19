@@ -139,6 +139,76 @@ namespace SSLCertificateMaker.Avalonia
             };
             tabControl.SelectionChanged += (_, _) => SetStatus("");
 
+            IssuerCombo.SelectionChanged += (_, _) =>
+            {
+                var item = IssuerCombo.SelectedItem as string;
+                if (item == OpenFile)
+                {
+                    var ofd = new OpenFileDialog
+                    {
+                        Title = "Select CA Certificate",
+                        Directory = CertDirectory,
+                        Filters = new List<FileDialogFilter>
+                        {
+                            new FileDialogFilter { Name = "Certificate Files", Extensions = new List<string> { "pfx", "key", "cer" } },
+                            new FileDialogFilter { Name = "All Files", Extensions = new List<string> { "*" } }
+                        }
+                    };
+                    var result = ofd.ShowAsync(this);
+                    result.ContinueWith(t =>
+                    {
+                        var files = t.Result;
+                        if (files != null && files.Length > 0)
+                        {
+                            var selectedFile = Path.GetFileName(files[0]);
+                            var capath = Path.GetFullPath(CaDirectory);
+                            var ext = Path.GetExtension(selectedFile);
+                            if (ext.Equals(".pfx", StringComparison.OrdinalIgnoreCase))
+                            {
+                                File.Copy(files[0], Path.Combine(capath, selectedFile), true);
+                                Dispatcher.UIThread.InvokeAsync(() =>
+                                {
+                                    IssuerCombo.SelectedItem = null;
+                                    PopulateIssuerDropdown();
+                                    IssuerCombo.SelectedItem = selectedFile;
+                                });
+                            }
+                            else if (ext.Equals(".key", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var cerfile = Path.ChangeExtension(files[0], ".cer");
+                                if (!File.Exists(cerfile)) ShowError("Missing *.cer File", "The selected .key file does not have a corresponding .cer file in the same location. Please ensure both .key and .cer files are present.");
+                                else
+                                {
+                                    File.Copy(files[0], Path.Combine(capath, selectedFile), true);
+                                    File.Copy(cerfile, Path.Combine(capath, Path.ChangeExtension(selectedFile, ".cer")), true);
+                                    Dispatcher.UIThread.InvokeAsync(() =>
+                                    {
+                                        IssuerCombo.SelectedItem = null;
+                                        PopulateIssuerDropdown();
+                                        IssuerCombo.SelectedItem = selectedFile;
+                                    });
+                                }
+                            }
+                            else if (ext.Equals(".cer", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var keyfile = Path.ChangeExtension(files[0], ".cer");
+                                if (!File.Exists(keyfile)) ShowError("Missing *.key File", "The selected .cer file does not have a corresponding .key file in the same location. Please ensure both .key and .cer files are present.");
+                                else
+                                {
+                                    File.Copy(files[0], Path.Combine(capath, selectedFile), true);
+                                    File.Copy(keyfile, Path.Combine(capath, Path.ChangeExtension(selectedFile, ".key")), true);
+                                    Dispatcher.UIThread.InvokeAsync(() =>
+                                    {
+                                        IssuerCombo.SelectedItem = null;
+                                        PopulateIssuerDropdown();
+                                        IssuerCombo.SelectedItem = selectedFile;
+                                    });
+                                }
+                            }
+                        }
+                    });
+                }
+            };
             StatusTextBlock.Text = string.Empty;
             StopProgress();
 
@@ -195,6 +265,7 @@ namespace SSLCertificateMaker.Avalonia
             }
         }
 
+        public const string OpenFile = "Open File ...";
         private void PopulateIssuerDropdown()
         {
             var previouslySelected = IssuerCombo.SelectedItem as string;
@@ -210,6 +281,7 @@ namespace SSLCertificateMaker.Avalonia
             }
 
             items.Sort(StringComparer.OrdinalIgnoreCase);
+            items.Add(OpenFile);
 
             IssuerCombo.ItemsSource = items;
             if (!string.IsNullOrEmpty(previouslySelected) && items.Contains(previouslySelected))
@@ -218,7 +290,7 @@ namespace SSLCertificateMaker.Avalonia
             }
             else
             {
-                IssuerCombo.SelectedIndex = items.Count > 1 ? 1 : 0;
+                IssuerCombo.SelectedItem = SelfSignedLabel;
             }
         }
 
@@ -460,6 +532,19 @@ namespace SSLCertificateMaker.Avalonia
             })).Value;
         }
 
+        public async Task<bool> ShowError(string title, string message)
+        {
+            return (await Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                var dialog = new TwofoldDialog
+                {
+                    Name = title,
+                    Message = message,
+                    PositiveText = "Ok",
+                };
+                return await dialog.ShowAsync();
+            })).Value;
+        }
         private async Task MakeCertificate(MakeCertArgs args, CancellationToken token)
         {
             Directory.CreateDirectory(CaDirectory);
@@ -468,6 +553,34 @@ namespace SSLCertificateMaker.Avalonia
             await SetStatus("Checking for existing certificate");
 
             var safeFileName = Path.Combine(args.OutputPath, SafeFileName(args.domains[0]));
+
+            var ofd = new SaveFileDialog
+            {
+                Title = "Save Certificate",
+                Directory = CertDirectory
+            };
+            if (args.saveCerAndKey)
+            {
+                ofd.InitialFileName = Path.GetFileName(safeFileName + ".cer");
+                ofd.Filters = new List<FileDialogFilter>
+                {
+                    new FileDialogFilter { Name = "Certificate Files", Extensions = new List<string> { "key", "cer" } },
+                    new FileDialogFilter { Name = "All Files", Extensions = new List<string> { "*" } }
+                };
+            }
+            else
+            {
+                ofd.InitialFileName = Path.GetFileName(safeFileName + ".pfx");
+                ofd.Filters = new List<FileDialogFilter>
+                {
+                    new FileDialogFilter { Name = "Certificate Files", Extensions = new List<string> { "pfx" } },
+                    new FileDialogFilter { Name = "All Files", Extensions = new List<string> { "*" } }
+                };
+            }
+            
+            var result = await ofd.ShowAsync(this);
+            if (!string.IsNullOrEmpty(result)) safeFileName = Path.Combine(Path.GetDirectoryName(result), Path.GetFileNameWithoutExtension(result));
+            else return;
 
             if (args.saveCerAndKey)
             {

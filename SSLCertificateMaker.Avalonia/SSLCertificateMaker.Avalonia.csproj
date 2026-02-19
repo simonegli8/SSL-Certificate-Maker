@@ -1,17 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net10.0;net48;netstandard2.0</TargetFrameworks>
+		<TargetFrameworks>net10.0;netstandard2.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 		<AssemblyTitle>SSLCertificateMaker</AssemblyTitle>
+		<AssemblyName>SSLCertificateMaker.Avalonia</AssemblyName>
 		<Product>SSL-Certificate Maker</Product>
 		<Copyright>Copyright © 2026</Copyright>
-		<AssemblyVersion>3.0.0.0</AssemblyVersion>
-		<FileVersion>3.0.0.0</FileVersion>
-		<Version>3.0.0.0</Version>
+		<AssemblyVersion>3.1.0.0</AssemblyVersion>
+		<FileVersion>3.1.0.0</FileVersion>
+		<Version>3.1.0.0</Version>
 		<OutputType Condition="$(TagretFramework) != 'netstandard2.0'">WinExe</OutputType>
 		<ApplicationIcon>cert.ico</ApplicationIcon>
 		<LangVersion>14</LangVersion>
@@ -23,20 +24,18 @@
 		<Description>A cross platform OpenSource GUI tool to create self signed SSL certificates.</Description>
 		<Copyright>Estrellas de Esperanza</Copyright>
 		<PackageProjectUrl>https://github.com/simonegli8/SSL-Certificate-Maker</PackageProjectUrl>
-		<PackageReadmeFile>tools/net10.0/any/README.md</PackageReadmeFile>
+		<PackageReadmeFile Condition="$(TargetFramework) == 'net10.0'">tools/$(TargetFramework)/any/README.md</PackageReadmeFile>
+		<PackageReadmeFile Condition="$(TargetFramework) == 'net48' Or $(TargetFramework) == 'netstandard2,0'">lib/$(TargetFramework)/any/README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/biblia-del-pueblo/BibleMarkdown</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>SSL Certificare Maker, SSL Certificate Generator, SSL Certificate, SSL Certificates, Free, OpenSource</PackageTags>
-		<AssemblyVersion>3.0.0</AssemblyVersion>
-		<FileVersion>3.0.0</FileVersion>
-		<Version>3.0.0</Version>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<IncludeSymbols>true</IncludeSymbols>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-		<PackAsTool>true</PackAsTool>
+		<PackAsTool Condition="$(TargetFramework) == 'net10.0'">true</PackAsTool>
 		<ToolCommandName>sslcertmaker</ToolCommandName>
 		<PackageOutputPath>../nupkg</PackageOutputPath>
 		<IncludeContentInPack>false</IncludeContentInPack>
@@ -102,4 +101,14 @@
 			<DependentUpon>PasswordPrompt.axaml</DependentUpon>
 		</Compile>
 	</ItemGroup>
+	
+	<ItemGroup Condition="$(TargetFramework) == 'net10.0'">
+		<!-- Include the tool DLL in the lib folder of the package -->
+		<None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="" />
+		<None Include="$(OutputPath)$(AssemblyName).pdb" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<Target Name="Info" AfterTargets="Build">	
+		<Message Text="$(OutputPath)$(AssemblyName).dll" Importance="high" />
+	</Target>
 </Project>
