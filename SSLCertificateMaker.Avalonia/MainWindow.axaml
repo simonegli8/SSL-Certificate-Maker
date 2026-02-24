@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:dialogHost="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
 		xmlns:cm="using:SSLCertificateMaker"
+		xmlns:vm="using:SSLCertificateMaker.Avalonia"
         mc:Ignorable="d"
         x:Class="SSLCertificateMaker.Avalonia.MainWindow"
         Title="SSL Certificate Maker"
@@ -117,8 +118,7 @@
 							<!--Password -->
 							<TextBlock Grid.Row="9" Grid.Column="0" Text="Pfx Password:" VerticalAlignment="Center" />
 							<Grid Grid.Row="9" Grid.Column="1" ColumnDefinitions="*,Auto">
-								<TextBox Grid.Column="0" x:Name="PasswordTextBox" PasswordChar="•" HorizontalAlignment="Stretch" />
-								<Button Grid.Column="1" Content="👁" x:Name="ShowPassword" Margin="8,0,0,0" />
+								<vm:PasswordBox Grid.Column="0" x:Name="PasswordTextBox" HorizontalAlignment="Stretch" />
 							</Grid>
 
 							<!-- Action row -->

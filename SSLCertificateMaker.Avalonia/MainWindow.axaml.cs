@@ -116,10 +116,6 @@ namespace SSLCertificateMaker.Avalonia
                 if (KeyUsageBox.IsVisible) KeyUsageBox.IsVisible = false;
                 ExtendedKeyUsageBox.IsVisible = !ExtendedKeyUsageBox.IsVisible;
             };
-            ShowPassword.Click += (_, _) =>
-            {
-                PasswordTextBox.PasswordChar = PasswordTextBox.PasswordChar == '\0' ? '•' : '\0';
-            };
             CertificateCombo.DropDownOpened += (_, _) => PopulateConvertDropdown();
             CertificateCombo.SelectionChanged += (_, args) =>
             {
