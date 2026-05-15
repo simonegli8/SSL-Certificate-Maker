@@ -63,6 +63,9 @@ namespace SSLCertificateMaker.Avalonia
         {
             //var exeDir = new DirectoryInfo(AppContext.BaseDirectory);
             var documentsDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            if (string.IsNullOrEmpty(documentsDir)) {
+                documentsDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            }
             CertDirectory = Path.Combine(documentsDir, "SSL-Certificates");
             CaDirectory = Path.Combine(CertDirectory, "CertificateAuthority");
             Directory.CreateDirectory(CaDirectory);
@@ -556,24 +559,26 @@ namespace SSLCertificateMaker.Avalonia
 
             var safeFileName = Path.Combine(args.OutputPath, SafeFileName(args.domains[0]));
 
-            var topLevel = TopLevel.GetTopLevel(this);
-            var folder = await topLevel.StorageProvider.TryGetFolderFromPathAsync(CertDirectory);
-            var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
+            var file = await Dispatcher.UIThread.InvokeAsync<IStorageFile>(async () =>
             {
-                Title = "Save Certificate",
-                SuggestedStartLocation = folder,
-                FileTypeChoices = args.saveCerAndKey
-                    ? new[]
-                    {
+                var topLevel = TopLevel.GetTopLevel(this);
+                var folder = await topLevel.StorageProvider.TryGetFolderFromPathAsync(CertDirectory);
+                return await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
+                {
+                    Title = "Save Certificate",
+                    SuggestedStartLocation = folder,
+                    FileTypeChoices = args.saveCerAndKey
+                        ? new[]
+                        {
                         new FilePickerFileType("Certificate Files") {
                             Patterns = new[] { "key", "cer" }
                         },
                         new FilePickerFileType("All Files") {
                             Patterns = new[] { "*" }
                         }
-                    }
-                    : new[]
-                    {
+                        }
+                        : new[]
+                        {
                         new FilePickerFileType("Certificate Files") {
                             Patterns = new[] { "pfx" }
                         },
@@ -581,12 +586,13 @@ namespace SSLCertificateMaker.Avalonia
                         {
                             Patterns = new[] { "*" }
                         }
-                    },
-                DefaultExtension = args.saveCerAndKey ? "cer" : "pfx",
-                SuggestedFileName = Path.GetFileName(safeFileName) + (args.saveCerAndKey ? ".cer" : ".pfx")
+                        },
+                    DefaultExtension = args.saveCerAndKey ? "cer" : "pfx",
+                    SuggestedFileName = Path.GetFileName(safeFileName) + (args.saveCerAndKey ? ".cer" : ".pfx")
+                });
             });
-            
-            var result = file.TryGetLocalPath();
+
+            var result = file?.TryGetLocalPath();
             if (!string.IsNullOrEmpty(result)) safeFileName = Path.Combine(Path.GetDirectoryName(result), Path.GetFileNameWithoutExtension(result));
             else return;
 
