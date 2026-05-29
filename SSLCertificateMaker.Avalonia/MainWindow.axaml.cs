@@ -63,6 +63,13 @@ namespace SSLCertificateMaker.Avalonia
         {
             //var exeDir = new DirectoryInfo(AppContext.BaseDirectory);
             var documentsDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            if (string.IsNullOrEmpty(documentsDir))
+            {
+                documentsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    "Documents");
+                if (!Directory.Exists(documentsDir)) Directory.CreateDirectory(documentsDir);
+            }
+
             CertDirectory = Path.Combine(documentsDir, "SSL-Certificates");
             CaDirectory = Path.Combine(CertDirectory, "CertificateAuthority");
             Directory.CreateDirectory(CaDirectory);
@@ -78,6 +85,8 @@ namespace SSLCertificateMaker.Avalonia
 
         private void InitializeUi()
         {
+            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+
             var version = typeof(MainWindow).Assembly.GetName().Version;
             Title += $" {version.Major}.{version.Minor}";
 
@@ -556,24 +565,30 @@ namespace SSLCertificateMaker.Avalonia
 
             var safeFileName = Path.Combine(args.OutputPath, SafeFileName(args.domains[0]));
 
-            var topLevel = TopLevel.GetTopLevel(this);
-            var folder = await topLevel.StorageProvider.TryGetFolderFromPathAsync(CertDirectory);
-            var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
+            IStorageFile? file = null;
+            await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                Title = "Save Certificate",
-                SuggestedStartLocation = folder,
-                FileTypeChoices = args.saveCerAndKey
-                    ? new[]
-                    {
+                var window = TopLevel.GetTopLevel(this) as Window;
+                window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                window?.Activate();
+                var topLevel = TopLevel.GetTopLevel(this);
+                var folder = await topLevel.StorageProvider.TryGetFolderFromPathAsync(CertDirectory);
+                file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
+                {
+                    Title = "Save Certificate",
+                    SuggestedStartLocation = folder,
+                    FileTypeChoices = args.saveCerAndKey
+                        ? new[]
+                        {
                         new FilePickerFileType("Certificate Files") {
                             Patterns = new[] { "*.key", "*.cer" }
                         },
                         new FilePickerFileType("All Files") {
                             Patterns = new[] { "*.*" }
                         }
-                    }
-                    : new[]
-                    {
+                        }
+                        : new[]
+                        {
                         new FilePickerFileType("Certificate Files") {
                             Patterns = new[] { "*.pfx" }
                         },
@@ -581,11 +596,12 @@ namespace SSLCertificateMaker.Avalonia
                         {
                             Patterns = new[] { "*.*" }
                         }
-                    },
-                DefaultExtension = args.saveCerAndKey ? "cer" : "pfx",
-                SuggestedFileName = Path.GetFileName(safeFileName) + (args.saveCerAndKey ? ".cer" : ".pfx")
+                        },
+                    DefaultExtension = args.saveCerAndKey ? "cer" : "pfx",
+                    SuggestedFileName = Path.GetFileName(safeFileName) + (args.saveCerAndKey ? ".cer" : ".pfx"),
+                    ShowOverwritePrompt = true
+                });
             });
-            
             if (file == null)
             {
                 await SetStatus("Operation cancelled.");
