@@ -566,26 +566,31 @@ namespace SSLCertificateMaker.Avalonia
                     ? new[]
                     {
                         new FilePickerFileType("Certificate Files") {
-                            Patterns = new[] { "key", "cer" }
+                            Patterns = new[] { "*.key", "*.cer" }
                         },
                         new FilePickerFileType("All Files") {
-                            Patterns = new[] { "*" }
+                            Patterns = new[] { "*.*" }
                         }
                     }
                     : new[]
                     {
                         new FilePickerFileType("Certificate Files") {
-                            Patterns = new[] { "pfx" }
+                            Patterns = new[] { "*.pfx" }
                         },
                         new FilePickerFileType("All Files")
                         {
-                            Patterns = new[] { "*" }
+                            Patterns = new[] { "*.*" }
                         }
                     },
                 DefaultExtension = args.saveCerAndKey ? "cer" : "pfx",
                 SuggestedFileName = Path.GetFileName(safeFileName) + (args.saveCerAndKey ? ".cer" : ".pfx")
             });
             
+            if (file == null)
+            {
+                await SetStatus("Operation cancelled.");
+                return;
+            }
             var result = file.TryGetLocalPath();
             if (!string.IsNullOrEmpty(result)) safeFileName = Path.Combine(Path.GetDirectoryName(result), Path.GetFileNameWithoutExtension(result));
             else return;
@@ -595,12 +600,12 @@ namespace SSLCertificateMaker.Avalonia
                 if (File.Exists(safeFileName + ".cer"))
                 {
                     await SetStatus("File already exists: " + safeFileName + ".cer");
-                    if (!await Confirm("File Already Exists", $"File already exists: {safeFileName}.cer. Do you want to overwrite it?")) return;
+                    //if (!await Confirm("File Already Exists", $"File already exists: {safeFileName}.cer. Do you want to overwrite it?")) return;
                 }
                 if (File.Exists(safeFileName + ".key"))
                 {
                     await SetStatus("File already exists: " + safeFileName + ".key");
-                    if (!await Confirm("File Already Exists", $"File already exists: {safeFileName}.key. Do you want to overwrite it?")) return;
+                    //if (!await Confirm("File Already Exists", $"File already exists: {safeFileName}.key. Do you want to overwrite it?")) return;
                 }
             }
             else
@@ -608,7 +613,7 @@ namespace SSLCertificateMaker.Avalonia
                 if (File.Exists(safeFileName + ".pfx"))
                 {
                     await SetStatus("File already exists: " + safeFileName + ".pfx");
-                    if (!await Confirm("File Already Exists", $"File already exists: {safeFileName}.pfx. Do you want to overwrite it?")) return;
+                    //if (!await Confirm("File Already Exists", $"File already exists: {safeFileName}.pfx. Do you want to overwrite it?")) return;
                 }
             }
 
