@@ -162,11 +162,15 @@ namespace SSLCertificateMaker.Avalonia
                             {
                                 new FilePickerFileType("Certificate Files")
                                 {
-                                    Patterns = new[] { "*.pfx", "*.key", "*.cer" }
+                                    Patterns = new[] { "*.pfx", "*.key", "*.cer",
+                                        "application/pkix-cert", "application/x-x509-ca-cert",
+                                        "application/x-pem-file", "application/x-pem-key", "application/pkcs8",
+                                        "application/pkcs8-encrypted", "application/x-pkcs12", "application/pkcs12"
+                                    }
                                 },
                                 new FilePickerFileType("All Files")
                                 {
-                                    Patterns = new[] { "*.*" }
+                                    Patterns = new[] { "*.*", "*" }
                                 }
                                 }
                         });
@@ -581,20 +585,22 @@ namespace SSLCertificateMaker.Avalonia
                         ? new[]
                         {
                         new FilePickerFileType("Certificate Files") {
-                            Patterns = new[] { "*.key", "*.cer" }
+                            Patterns = new[] { "*.key", "*.cer", "application/pkix-cert", "application/x-x509-ca-cert",
+                                "application/x-pem-file", "application/x-pem-key", "application/pkcs8",
+                                "application/pkcs8-encrypted" }
                         },
                         new FilePickerFileType("All Files") {
-                            Patterns = new[] { "*.*" }
+                            Patterns = new[] { "*.*", "*" }
                         }
                         }
                         : new[]
                         {
                         new FilePickerFileType("Certificate Files") {
-                            Patterns = new[] { "*.pfx" }
+                            Patterns = new[] { "*.pfx", "application/x-pkcs12", "application/pkcs12" }
                         },
                         new FilePickerFileType("All Files")
                         {
-                            Patterns = new[] { "*.*" }
+                            Patterns = new[] { "*.*", "*" }
                         }
                         },
                     DefaultExtension = args.saveCerAndKey ? "cer" : "pfx",
