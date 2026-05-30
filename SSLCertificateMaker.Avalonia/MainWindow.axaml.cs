@@ -8,7 +8,6 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using AvaloniaDialogs.Views;
 using Org.BouncyCastle.Asn1.X509;
-using SSLCertificateMaker;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -174,7 +173,8 @@ namespace SSLCertificateMaker.Avalonia
                                 }
                                 }
                         });
-                    if (files != null && files.Count > 0) {
+                    if (files != null && files.Count > 0)
+                    {
                         var localPath = files[0].TryGetLocalPath();
                         var selectedFile = Path.GetFileName(localPath);
                         var capath = Path.GetFullPath(CaDirectory);
@@ -656,13 +656,27 @@ namespace SSLCertificateMaker.Avalonia
                 var issuerFile = Path.Combine(CaDirectory, args.issuer);
                 if (issuerFile.EndsWith(".pfx", StringComparison.OrdinalIgnoreCase))
                 {
-                    issuerBundle = CertificateBundle.LoadFromPfxFile(issuerFile, null);
+
+                    try
+                    {
+                        issuerBundle = CertificateBundle.LoadFromPfxFile(issuerFile, null);
+                    }
+                    catch (Exception ex) { }
                     if (issuerBundle == null)
                     {
-                        var passwordPrompt = new PasswordPrompt();
-                        var password = await passwordPrompt.ShowDialog<string?>(this);
-                        issuerBundle = CertificateBundle.LoadFromPfxFile(issuerFile, password);
-
+                        var password = await Dispatcher.UIThread.InvokeAsync(async () =>
+                        {
+                            var passwordPrompt = new PasswordPrompt();
+                            return await passwordPrompt.ShowDialog<string?>(this);
+                        });
+                        try
+                        {
+                            issuerBundle = CertificateBundle.LoadFromPfxFile(issuerFile, password);
+                        }
+                        catch (Exception ex) {
+                            await SetStatus($"Unable to load CA .pfx file (wrong password): {ex.Message}");
+                            return;
+                        }
                         if (issuerBundle == null)
                         {
                             await SetStatus("Unable to load CA .pfx file (wrong password).");
