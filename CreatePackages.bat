@@ -1,8 +1,8 @@
-SET PackageVersion=4.0.3
+SET PackageVersion=4.0.6
 SET Configuration=Release
 
-del nupkg\*.nupkg
-del nupkg\*.snupkg
+del nupkg\SSLCertificateMaker*.nupkg
+del nupkg\SSLCertificateMaker*.snupkg
 
 dotnet pack -c %Configuration% -p:Version=%PackageVersion% -p:FileVersion=%PackageVersion% -p:AssemblyVersion=%PackageVersion%
 dotnet pack -c %Configuration% -p:Version=%PackageVersion% -p:FileVersion=%PackageVersion% -p:AssemblyVersion=%PackageVersion% -p:PackAsTool=false
