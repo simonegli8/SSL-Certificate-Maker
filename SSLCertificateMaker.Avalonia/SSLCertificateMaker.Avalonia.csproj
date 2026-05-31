@@ -12,9 +12,6 @@
 		<AssemblyName>SSLCertificateMaker.Avalonia</AssemblyName>
 		<Product>SSL-Certificate Maker</Product>
 		<Copyright>Copyright © 2026</Copyright>
-		<AssemblyVersion>4.0.0.0</AssemblyVersion>
-		<FileVersion>4.0.0.0</FileVersion>
-		<Version>4.0.0.0</Version>
 		<OutputType Condition="$(TagretFramework) != 'netstandard2.0'">WinExe</OutputType>
 		<ApplicationIcon>cert.ico</ApplicationIcon>
 		<LangVersion>14</LangVersion>
@@ -30,7 +27,7 @@
 		<PackageProjectUrl>https://github.com/simonegli8/SSL-Certificate-Maker</PackageProjectUrl>
 		<PackageReadmeFile Condition="$(PackAsTool) == 'true'">tools/$(TargetFramework)/any/README.md</PackageReadmeFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<RepositoryUrl>https://github.com/biblia-del-pueblo/BibleMarkdown</RepositoryUrl>
+		<RepositoryUrl>https://github.com/simonegli8/SSL-Certificate-Maker</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>SSL Certificare Maker, SSL Certificate Generator, SSL Certificate, SSL Certificates, Free, OpenSource</PackageTags>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -43,13 +40,20 @@
 		<PackageOutputPath>../nupkg</PackageOutputPath>
 		<IncludeBuildOutput>true</IncludeBuildOutput>
 		<Configurations>Debug;Release</Configurations>
-
 	</PropertyGroup>
-	<ItemGroup>
+
+    <PropertyGroup  Condition="$(PackAsTool) == 'true'">
+        <DefineConstants>$(DefineConstants);PackAsTool</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup>
 		<None Remove="delete-white.png" />
 		<None Remove="delete-white.svg" />
 		<None Remove="delete.png" />
 		<None Remove="delete.svg" />
+		<None Remove="Installer\Resources\cert.icns" />
+		<None Remove="Installer\Resources\cert.ico" />
+		<None Remove="Installer\Resources\cert.png" />
 		<None Remove="pen-white.png" />
 		<None Remove="pen.png" />
 		<None Remove="pen.svg" />
@@ -76,6 +80,7 @@
 		<PackageReference Include="Xaml.Behaviors.Interactions" Version="12.0.0.1" />
         <PackageReference Include="Xaml.Behaviors.Interactivity" Version="12.0.0.1" />
 		<PackageReference Include="DotnetRuntimeBootstrapper" Version="2.5.4" />
+        <PackageReference Condition="$(PackAsTool) == 'true'" Include="GUIToolsInstaller" Version="1.0.3" />
 	</ItemGroup>
 
     <ItemGroup Condition="$(PackAsTool) == 'true'">
@@ -118,6 +123,12 @@
 		<Compile Update="PasswordPrompt.axaml.cs">
 			<DependentUpon>PasswordPrompt.axaml</DependentUpon>
 		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Installer\Resources\cert.icns" />
+	  <EmbeddedResource Include="Installer\Resources\cert.ico" />
+	  <EmbeddedResource Include="Installer\Resources\cert.png" />
 	</ItemGroup>
 
 </Project>
