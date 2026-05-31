@@ -16,6 +16,11 @@ To install SSL-Certificate-Maker, install the [.NET 10 SDK](https://get.dot.net/
 ```
 dotnet tool install -g SSLCertificateMaker
 ```
+And then run
+```
+sslcertmaker install
+```
+to install a shortcut to your start menu.
 
 and then run it by executing
 

@@ -40,7 +40,8 @@
 		<PackageOutputPath>../nupkg</PackageOutputPath>
 		<IncludeBuildOutput>true</IncludeBuildOutput>
 		<Configurations>Debug;Release</Configurations>
-	</PropertyGroup>
+        <RestoreSources>..\nupkg;$(RestoreSources)</RestoreSources>
+    </PropertyGroup>
 
     <PropertyGroup  Condition="$(PackAsTool) == 'true'">
         <DefineConstants>$(DefineConstants);PackAsTool</DefineConstants>
@@ -80,7 +81,7 @@
 		<PackageReference Include="Xaml.Behaviors.Interactions" Version="12.0.0.1" />
         <PackageReference Include="Xaml.Behaviors.Interactivity" Version="12.0.0.1" />
 		<PackageReference Include="DotnetRuntimeBootstrapper" Version="2.5.4" />
-        <PackageReference Condition="$(PackAsTool) == 'true'" Include="GUIToolsInstaller" Version="1.0.3" />
+        <PackageReference Condition="$(PackAsTool) == 'true'" Include="GUIToolsInstaller" Version="1.0.7" />
 	</ItemGroup>
 
     <ItemGroup Condition="$(PackAsTool) == 'true'">
