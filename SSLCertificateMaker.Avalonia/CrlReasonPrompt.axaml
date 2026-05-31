@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:SSLCertificateMaker.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="SSLCertificateMaker.Avalonia.CrlReasonPrompt"
+		MinWidth="400" MinHeight="120"
+		Width="400" Height="120"
+		Title="Revoke Reason">
+	<Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,Auto" Margin="15" RowSpacing="15" ColumnSpacing="5">
+        <TextBlock x:Name="ReasonLabel" Grid.Row="0" Grid.Column="0" Text="Revocation Reason:" VerticalAlignment="Center" />
+		<StackPanel Grid.Row="0" Grid.Column="1" Spacing="8" Orientation="Horizontal">
+            <ComboBox x:Name="Reason" Width="200" x:DataType="vm:CrlReasonPrompt"
+                      ItemsSource="{Binding Reasons}"
+                      SelectedItem="{Binding SelectedReason}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+		<StackPanel Spacing="8" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal">
+			<Button x:Name="OkButton" Content="Ok" IsDefault="True" />
+			<Button x:Name="CancelButton" Content="Cancel" />
+		</StackPanel>
+	</Grid>
+</Window>

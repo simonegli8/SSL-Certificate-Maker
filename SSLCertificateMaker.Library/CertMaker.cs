@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using Org.BouncyCastle.Asn1;
+﻿using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Asn1.Sec;
 using Org.BouncyCastle.Asn1.X509;
@@ -23,14 +16,72 @@ using Org.BouncyCastle.Utilities.Collections;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Extension;
 using Org.BouncyCastle.X509.Store;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Crypt = System.Security.Cryptography;
+using Ext=System.Security.Cryptography.X509Certificates.RSACertificateExtensions;
+using Sys=System.Security.Cryptography.X509Certificates;
 
-namespace SSLCertificateMaker
+namespace SSLCertificateMaker.Library
 {
-	public static class CertMaker
+    public class ReasonItem
+    {
+        public string Name { get; set; }
+        public int Reason { get; set; }
+		public ReasonItem(string name, int reason)
+        {
+            Name = name;
+            Reason = reason;
+        }
+    }
+
+    public static class CertMaker
 	{
 		internal static SecureRandom secureRandom = new SecureRandom();
+        public static readonly ObservableCollection<ReasonItem> Reasons = new ObservableCollection<ReasonItem>(
+			new[] { new ReasonItem("Unspecified", CrlReason.Unspecified),
+             new ReasonItem("AACompromise", CrlReason.AACompromise),
+             new ReasonItem("AffiliationChanged", CrlReason.AffiliationChanged),
+             new ReasonItem("CACompromise", CrlReason.CACompromise),
+             new ReasonItem("CertificateHold", CrlReason.CertificateHold),
+             new ReasonItem("CessationOfOperation", CrlReason.CessationOfOperation),
+             new ReasonItem("KeyCompromise", CrlReason.KeyCompromise),
+             new ReasonItem("PrivilegeWithdrawn", CrlReason.PrivilegeWithdrawn),
+             new ReasonItem("RemoveFromCrl", CrlReason.RemoveFromCrl),
+             new ReasonItem("Superseded", CrlReason.Superseded),
+		});
 
-		private static AsymmetricCipherKeyPair GenerateRsaKeyPair(int length)
+        public static int? ToInt(string name) => Reasons.FirstOrDefault(r => r.Name == name).Reason;
+        public static string ToString(int? reason) => Reasons.FirstOrDefault(r => r.Reason == reason).Name;
+
+		public static readonly string CaDirectory;
+        public static readonly string CertDirectory;
+        public static readonly string RevokedDirectory;
+		static CertMaker()
+		{
+            //var exeDir = new DirectoryInfo(AppContext.BaseDirectory);
+            var documentsDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            if (string.IsNullOrEmpty(documentsDir))
+            {
+                documentsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    "Documents");
+                if (!Directory.Exists(documentsDir)) Directory.CreateDirectory(documentsDir);
+            }
+
+            CertDirectory = Path.Combine(documentsDir, "SSL-Certificates");
+            CaDirectory = Path.Combine(CertDirectory, "CertificateAuthority");
+            RevokedDirectory = Path.Combine(CertDirectory, "RevokedCertificates");
+            Directory.CreateDirectory(CaDirectory);
+            Directory.CreateDirectory(CertDirectory);
+        }
+        private static AsymmetricCipherKeyPair GenerateRsaKeyPair(int length)
 		{
 			KeyGenerationParameters keygenParam = new KeyGenerationParameters(secureRandom, length);
 
@@ -59,7 +110,9 @@ namespace SSLCertificateMaker
 		/// <param name="issuerPublic"></param>
 		/// <param name="issuerPrivate"></param>
 		/// <returns></returns>
-		private static X509Certificate GenerateCertificate(MakeCertArgs args, AsymmetricKeyParameter subjectPublic, string issuerName, AsymmetricKeyParameter issuerPublic, AsymmetricKeyParameter issuerPrivate)
+		private static X509Certificate GenerateCertificate(MakeCertArgs args, AsymmetricKeyParameter subjectPublic,
+			string issuerName, AsymmetricKeyParameter issuerPublic, AsymmetricKeyParameter issuerPrivate,
+			BigInteger issuerSerialNumber = null, X509Name issuerDN = null)
 		{
 			bool isCA = args.KeyUsage == (KeyUsage.CrlSign | KeyUsage.KeyCertSign);
 
@@ -67,38 +120,46 @@ namespace SSLCertificateMaker
 			if (issuerPrivate is ECPrivateKeyParameters)
 			{
 				signatureFactory = new Asn1SignatureFactory(
-					X9ObjectIdentifiers.ECDsaWithSha256.ToString(),
+					X9ObjectIdentifiers.ECDsaWithSha256.Id,
 					issuerPrivate);
 			}
 			else
 			{
 				signatureFactory = new Asn1SignatureFactory(
-					PkcsObjectIdentifiers.Sha256WithRsaEncryption.ToString(),
+					PkcsObjectIdentifiers.Sha256WithRsaEncryption.Id,
 					issuerPrivate);
 			}
 
 			X509V3CertificateGenerator certGenerator = new X509V3CertificateGenerator();
 			certGenerator.SetIssuerDN(new X509Name("CN=" + issuerName));
-			certGenerator.SetSubjectDN(new X509Name("CN=" + args.domains[0]));
-			certGenerator.SetSerialNumber(BigInteger.ProbablePrime(120, new Random()));
-			certGenerator.SetNotBefore(args.validFrom);
-			certGenerator.SetNotAfter(args.validTo);
+			certGenerator.SetSubjectDN(new X509Name("CN=" + args.Domains[0]));
+            SecureRandom random = new SecureRandom();
+            byte[] bytes = new byte[16]; // 128-bit serial (good practice)
+            random.NextBytes(bytes);
+            BigInteger serial = new BigInteger(1, bytes);
+            certGenerator.SetSerialNumber(serial);
+			certGenerator.SetNotBefore(args.ValidFrom);
+			certGenerator.SetNotAfter(args.ValidTo);
 			certGenerator.SetPublicKey(subjectPublic);
 
 			if (issuerPublic != null)
 			{
-				AuthorityKeyIdentifierStructure akis = new AuthorityKeyIdentifierStructure(issuerPublic);
-				certGenerator.AddExtension(X509Extensions.AuthorityKeyIdentifier, false, akis);
+                var spki = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(issuerPublic);
+                var aki = new AuthorityKeyIdentifier(spki,
+                    new GeneralNames(new GeneralName(issuerDN)),
+					issuerSerialNumber);
+
+				certGenerator.AddExtension(X509Extensions.AuthorityKeyIdentifier, false, aki);
 			}
 
 			// Subject Key Identifier
 			SubjectKeyIdentifierStructure skis = new SubjectKeyIdentifierStructure(subjectPublic);
 			certGenerator.AddExtension(X509Extensions.SubjectKeyIdentifier, false, skis);
 
-			if (!isCA || args.domains.Length > 1)
+			if (!isCA || args.Domains.Length > 1)
 			{
 				// Add SANs (Subject Alternative Names)
-				GeneralName[] names = args.domains.Select(domain => new GeneralName(GetGeneralNameType(domain), domain)).ToArray();
+				GeneralName[] names = args.Domains.Select(domain => new GeneralName(GetGeneralNameType(domain), domain)).ToArray();
 				GeneralNames subjectAltName = new GeneralNames(names);
 				certGenerator.AddExtension(X509Extensions.SubjectAlternativeName, false, subjectAltName);
 			}
@@ -111,8 +172,43 @@ namespace SSLCertificateMaker
 
 			// Specify Basic Constraints
 			certGenerator.AddExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(isCA));
+          
+			if (isCA && !string.IsNullOrWhiteSpace(args.CertificateRevocationListUrl))
+            {
+                var crlUri = new GeneralName(
+                    GeneralName.UniformResourceIdentifier,
+                    args.CertificateRevocationListUrl.Trim());
 
-			return certGenerator.Generate(signatureFactory);
+                var distPointName = new DistributionPointName(
+                    new GeneralNames(crlUri));
+
+                var distPoint = new DistributionPoint(
+                    distPointName,
+                    null,
+                    null);
+
+                var crlDistributionPoints = new CrlDistPoint(new[] { distPoint });
+
+                certGenerator.AddExtension(
+                    X509Extensions.CrlDistributionPoints,
+                    false,
+                    crlDistributionPoints);
+            }
+
+            if (isCA && !string.IsNullOrWhiteSpace(args.OCSPResponderUrl))
+            {
+                var aia = new AuthorityInformationAccess(
+                    AccessDescription.IdADOcsp,
+                    new GeneralName(
+                        GeneralName.UniformResourceIdentifier,
+                        args.OCSPResponderUrl.Trim()));
+
+                certGenerator.AddExtension(
+                    X509Extensions.AuthorityInfoAccess,
+                    false,
+                    aia);
+            }
+            return certGenerator.Generate(signatureFactory);
 		}
 		/// <summary>
 		/// Returns <c>GeneralName.IPAddress</c> if the <c>domain</c> is an IPv4 or IPv6 address, otherwise returns <c>GeneralName.DnsName</c>.
@@ -194,8 +290,8 @@ namespace SSLCertificateMaker
 		/// <returns></returns>
 		public static CertificateBundle GetCertificateSignedBySelf(MakeCertArgs args)
 		{
-			AsymmetricCipherKeyPair keys = GenerateRsaKeyPair(args.keyStrength);
-			X509Certificate cert = GenerateCertificate(args, keys.Public, args.domains[0], null, keys.Private);
+			AsymmetricCipherKeyPair keys = GenerateRsaKeyPair(args.KeyStrength);
+			X509Certificate cert = GenerateCertificate(args, keys.Public, args.Domains[0], null, keys.Private);
 
 			return new CertificateBundle(cert, keys.Private);
 		}
@@ -211,34 +307,86 @@ namespace SSLCertificateMaker
 		/// <returns></returns>
 		public static CertificateBundle GetCertificateSignedByCA(MakeCertArgs args, CertificateBundle ca)
 		{
-			AsymmetricCipherKeyPair keys = GenerateRsaKeyPair(args.keyStrength);
-			X509Certificate cert = GenerateCertificate(args, keys.Public, ca.GetSubjectName(), ca.cert.GetPublicKey(), ca.privateKey);
+			AsymmetricCipherKeyPair keys = GenerateRsaKeyPair(args.KeyStrength);
+			X509Certificate cert = GenerateCertificate(args, keys.Public, ca.GetSubjectName(), ca.cert.GetPublicKey(),
+				ca.privateKey, ca.cert.SerialNumber, ca.cert.SubjectDN);
 
 			CertificateBundle b = new CertificateBundle(cert, keys.Private);
 			b.SetIssuerBundle(ca);
 			return b;
 		}
 
-		///// <summary>
-		///// Generates a certificate signed by the specified certificate authority.
-		///// </summary>
-		///// <param name="domains">An array of domain names or subject common names / alternative names.</param>
-		///// <param name="keySizeBits">Key size in bits for the RSA keys.</param>
-		///// <param name="validFrom">Start date for certificate validity.</param>
-		///// <param name="validTo">End date for certificate validity.</param>
-		///// <param name="caName">The name of the certificate authority, e.g. "Do Not Trust This Root CA".</param>
-		///// <param name="caPublic">The public key of the certificate authority.  May be null if you don't have it handy.</param>
-		///// <param name="caPrivate">The private key of the certificate authority.</param>
-		///// <returns></returns>
-		//public static CertificateBundle GetCertificateSignedByCA(string[] domains, int keySizeBits, DateTime validFrom, DateTime validTo, string caName, AsymmetricKeyParameter caPublic, AsymmetricKeyParameter caPrivate)
-		//{
-		//	AsymmetricCipherKeyPair keys = GenerateRsaKeyPair(keySizeBits);
-		//	X509Certificate cert = GenerateCertificate(domains, keys.Public, validFrom, validTo, caName, caPublic, caPrivate, null);
+        public static X509Crl GenerateCrl(
+			X509Name subjectDN,
+			DateTime lastUpdate,
+			DateTime nextUpdate,
+			AsymmetricKeyParameter caPrivateKey,
+			IEnumerable<BigInteger> revokedSerials)
+        {
+            var crlGen = new X509V2CrlGenerator();
 
-		//	return new CertificateBundle(cert, keys.Private);
-		//}
-		#endregion
-	}
+            // CRL issuer = CA subject
+            crlGen.SetIssuerDN(subjectDN);
+
+            // This update
+            crlGen.SetThisUpdate(lastUpdate);
+
+            // Next update
+            crlGen.SetNextUpdate(nextUpdate);
+
+            // Add revoked certificates
+            foreach (var serial in revokedSerials)
+            {
+                crlGen.AddCrlEntry(
+                    serial,
+                    DateTime.UtcNow,
+                    CrlReason.PrivilegeWithdrawn);
+            }
+
+            // Signature algorithm
+            var signatureFactory = new Asn1SignatureFactory(
+                "SHA256WITHRSA",
+                caPrivateKey);
+
+            return crlGen.Generate(signatureFactory);
+        }
+
+        public static X509Crl CreateCertificateRevocationList(string file, Sys.X509Certificate2 issuer, AsymmetricKeyParameter privateKey, DateTime lastUpdate, DateTime nextUpdate, RevokeItemsList items, CancellationToken cancel)
+		{
+#if NETCOREAPP
+			if (privateKey == null)
+			{
+				var rsa = Ext.GetRSAPrivateKey(issuer);
+				if (rsa == null)
+					throw new InvalidOperationException("Issuer certificate has no RSA private key.");
+				privateKey = DotNetUtilities.GetRsaKeyPair(rsa).Private;
+			}
+			var crl = GenerateCrl(new X509Name(issuer.Subject), lastUpdate, nextUpdate, privateKey, items.Select(item => new Org.BouncyCastle.Math.BigInteger(1, item.SerialNumber.ToByteArray())));
+			return crl;
+#else
+			throw new PlatformNotSupportedException("NET Standard not supported.");
+#endif
+		}
+        ///// <summary>
+        ///// Generates a certificate signed by the specified certificate authority.
+        ///// </summary>
+        ///// <param name="domains">An array of domain names or subject common names / alternative names.</param>
+        ///// <param name="keySizeBits">Key size in bits for the RSA keys.</param>
+        ///// <param name="validFrom">Start date for certificate validity.</param>
+        ///// <param name="validTo">End date for certificate validity.</param>
+        ///// <param name="caName">The name of the certificate authority, e.g. "Do Not Trust This Root CA".</param>
+        ///// <param name="caPublic">The public key of the certificate authority.  May be null if you don't have it handy.</param>
+        ///// <param name="caPrivate">The private key of the certificate authority.</param>
+        ///// <returns></returns>
+        //public static CertificateBundle GetCertificateSignedByCA(string[] domains, int keySizeBits, DateTime validFrom, DateTime validTo, string caName, AsymmetricKeyParameter caPublic, AsymmetricKeyParameter caPrivate)
+        //{
+        //	AsymmetricCipherKeyPair keys = GenerateRsaKeyPair(keySizeBits);
+        //	X509Certificate cert = GenerateCertificate(domains, keys.Public, validFrom, validTo, caName, caPublic, caPrivate, null);
+
+        //	return new CertificateBundle(cert, keys.Private);
+        //}
+        #endregion
+    }
 
 	public class CertificateBundle
 	{
@@ -304,7 +452,9 @@ namespace SSLCertificateMaker
 		public byte[] GetPfx(string password)
 		{
 			string subject = GetSubjectName();
-			Pkcs12Store pkcs12Store = new Pkcs12StoreBuilder().Build();
+			Pkcs12Store pkcs12Store = new Pkcs12StoreBuilder()
+                .SetUseDerEncoding(true)
+                .Build();
 			X509CertificateEntry certEntry = new X509CertificateEntry(cert);
 			X509CertificateEntry[] chainEntries = new X509CertificateEntry[] { certEntry }.Concat(chain.Select(c => new X509CertificateEntry(c))).ToArray();
 			foreach (X509CertificateEntry ce in chainEntries)
@@ -313,8 +463,16 @@ namespace SSLCertificateMaker
 			using (MemoryStream pfxStream = new MemoryStream())
 			{
 				pkcs12Store.Save(pfxStream, password == null ? null : password.ToCharArray(), CertMaker.secureRandom);
-				return pfxStream.ToArray();
-			}
+				var pfxBCBytes = pfxStream.ToArray();
+#if NETSTANDARD2_0
+				return pfxBCBytes;
+#else
+				var cert2 = Sys.X509CertificateLoader.LoadPkcs12(pfxBCBytes, password,
+					Sys.X509KeyStorageFlags.Exportable | Sys.X509KeyStorageFlags.EphemeralKeySet);
+                byte[] pfxBytes = cert2.Export(Sys.X509ContentType.Pfx, password);
+				return pfxBytes;
+#endif
+            }
 		}
 		/// <summary>
 		/// Loads a CertificateBundle from .cer and .key files.

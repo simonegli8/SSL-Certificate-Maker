@@ -16,6 +16,7 @@ using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
+using SSLCertificateMaker.Library;
 
 namespace SSLCertificateMaker
 {
@@ -99,8 +100,8 @@ namespace SSLCertificateMaker
 													 (string)ddlOutputType.SelectedItem == ".cer, .key",
 													 cbIssuerSelect.SelectedItem.ToString(),
 													 msKeyUsage.SelectedItems.Cast<MultiSelectIntItem>().Select(i => i.Value).Sum(),
-													 msExtendedKeyUsage.SelectedItems.Cast<MultiSelectKeyPurposeItem>().Select(i => i.Value).ToArray()
-													 );
+													 msExtendedKeyUsage.SelectedItems.Cast<MultiSelectKeyPurposeItem>().Select(i => i.Value).ToArray(),
+													 null, null);
 				args.OutputPath = CERT_DIR;
 				if (LooksLikeCA(args))
 				{
@@ -112,7 +113,7 @@ namespace SSLCertificateMaker
 						args.OutputPath = CA_DIR;
 					}
 				}
-				if (args.domains.Length == 0)
+				if (args.Domains.Length == 0)
 				{
 					MessageBox.Show("No domain names were entered!" + Environment.NewLine + Environment.NewLine
 						+ "You should at least enter localhost if you don't want any other domain names.");
@@ -161,8 +162,8 @@ namespace SSLCertificateMaker
 				MakeCertArgs args = (MakeCertArgs)Argument;
 
 				// Verify that the files do not already exist
-				string safeFileName = Path.Combine(args.OutputPath, SafeFileName(args.domains[0]));
-				if (args.saveCerAndKey)
+				string safeFileName = Path.Combine(args.OutputPath, SafeFileName(args.Domains[0]));
+				if (args.SaveCerAndKey)
 				{
 					if (File.Exists(safeFileName + ".cer"))
 					{
@@ -187,14 +188,14 @@ namespace SSLCertificateMaker
 				SetStatus("Generating certificate");
 
 				CertificateBundle certBundle;
-				if (args.issuer == c_SelfSigned)
+				if (args.Issuer == c_SelfSigned)
 				{
 					certBundle = CertMaker.GetCertificateSignedBySelf(args);
 				}
 				else
 				{
 					CertificateBundle issuerBundle = null;
-					string issuerFile = Path.Combine(CA_DIR, args.issuer);
+					string issuerFile = Path.Combine(CA_DIR, args.Issuer);
 					if (issuerFile.EndsWith(".pfx", StringComparison.OrdinalIgnoreCase))
 					{
 						string password = null;
@@ -223,16 +224,16 @@ namespace SSLCertificateMaker
 
 				SetStatus("Saving certificate to disk");
 
-				if (args.saveCerAndKey)
+				if (args.SaveCerAndKey)
 				{
 					File.WriteAllBytes(safeFileName + ".cer", certBundle.GetPublicCertAsCerFile());
 					File.WriteAllBytes(safeFileName + ".key", certBundle.GetPrivateKeyAsKeyFile());
 				}
 				else
 				{
-					if (args.password == "")
-						args.password = null;
-					File.WriteAllBytes(safeFileName + ".pfx", certBundle.GetPfx(args.password));
+					if (args.Password == "")
+						args.Password = null;
+					File.WriteAllBytes(safeFileName + ".pfx", certBundle.GetPfx(args.Password));
 				}
 
 				SetStatus("");

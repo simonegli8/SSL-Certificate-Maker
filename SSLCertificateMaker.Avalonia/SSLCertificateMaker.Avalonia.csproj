@@ -12,9 +12,9 @@
 		<AssemblyName>SSLCertificateMaker.Avalonia</AssemblyName>
 		<Product>SSL-Certificate Maker</Product>
 		<Copyright>Copyright © 2026</Copyright>
-		<AssemblyVersion>3.6.3.0</AssemblyVersion>
-		<FileVersion>3.6.3.0</FileVersion>
-		<Version>3.6.3.0</Version>
+		<AssemblyVersion>4.0.0.0</AssemblyVersion>
+		<FileVersion>4.0.0.0</FileVersion>
+		<Version>4.0.0.0</Version>
 		<OutputType Condition="$(TagretFramework) != 'netstandard2.0'">WinExe</OutputType>
 		<ApplicationIcon>cert.ico</ApplicationIcon>
 		<LangVersion>14</LangVersion>
@@ -46,11 +46,19 @@
 
 	</PropertyGroup>
 	<ItemGroup>
+		<None Remove="delete-white.png" />
+		<None Remove="delete-white.svg" />
+		<None Remove="delete.png" />
+		<None Remove="delete.svg" />
 		<None Remove="pen-white.png" />
 		<None Remove="pen.png" />
 		<None Remove="pen.svg" />
 	</ItemGroup>
 	<ItemGroup>
+		<AvaloniaResource Include="delete-white.png" />
+		<AvaloniaResource Include="delete-white.svg" />
+		<AvaloniaResource Include="delete.png" />
+		<AvaloniaResource Include="delete.svg" />
 		<AvaloniaResource Include="pen-white.png" />
 		<AvaloniaResource Include="pen.png" />
 		<AvaloniaResource Include="pen.svg" />
@@ -104,6 +112,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Update="CrlReasonPrompt.axaml.cs">
+		  <DependentUpon>CrlReasonPrompt.axaml</DependentUpon>
+		</Compile>
 		<Compile Update="PasswordPrompt.axaml.cs">
 			<DependentUpon>PasswordPrompt.axaml</DependentUpon>
 		</Compile>
