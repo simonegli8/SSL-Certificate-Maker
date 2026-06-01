@@ -1061,6 +1061,8 @@ namespace SSLCertificateMaker.Avalonia
                     File.Copy(safeFileName + ".pfx", Path.Combine(CaDirectory, Path.GetFileName(safeFileName + ".pfx")));
                 }
             }
+
+            await SetStatus("Done.");
         }
 
         private string SafeFileName(string str)
