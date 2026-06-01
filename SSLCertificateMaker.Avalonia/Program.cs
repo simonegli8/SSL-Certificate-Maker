@@ -15,9 +15,7 @@ namespace SSLCertificateMaker.Avalonia
         public static async Task Main(string[] args)
         {
 #if  PackAsTool
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            var version = assembly.GetName().Version.ToString(3); ;
-            if (!GUIToolInstaller.Installer.Run(args, "SSL-Certificate-Maker", "cert", version, "SSL-Certificate-Maker, a cross platform GUI tool to manage self signed certificates."))
+            if (!GUIToolInstaller.Installer.Run(args, "SSL-Certificate-Maker", "cert", "SSL-Certificate-Maker, a cross platform GUI tool to manage self signed certificates."))
             {
                 BuildAvaloniaApp()
                 .StartWithClassicDesktopLifetime(args);

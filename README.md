@@ -5,9 +5,12 @@ A cross platform GUI tool for generating SSL certificates without any prior know
 
 ## Purpose
 
-This program is intended for use in private networks, home labs, etc, where you want to easily create SSL certificates that never expire, and you are willing to make your operating system trust your own certificate authority.
+This program is intended for use in private networks, home labs, etc, where you want to easily create SSL
+certificates that never expire, and you are willing to make your operating system trust your own certificate
+authority.
 
-If you need a certificate for a public web server, this is not the tool for you.  What you want is a certificate signed by globally-trusted certificate authority like [LetsEncrypt - Free SSL/TLS Certificates](https://letsencrypt.org/).
+If you need a certificate for a public web server, this is not the tool for you.  What you want is a certificate
+signed by globally-trusted certificate authority like [LetsEncrypt - Free SSL/TLS Certificates](https://letsencrypt.org/).
 
 ## Usage
 
@@ -30,34 +33,61 @@ sslcertmaker
 
 The created certificates will be stored in your `Documents/SSL-Certificates` folder.
 
-For basic usage, you can simply click the `Make Certificate` button and find a new `localhost.pfx` file created in your `Documents/SSL-Certificates` directory.  Nobody likes renewing self-signed certificates, so by default this program uses an expiration date that is 500 years after you started it.
+For basic usage, you can simply click the `Make Certificate` button and find a new `localhost.pfx` file created in
+your `Documents/SSL-Certificates` directory.  Nobody likes renewing self-signed certificates, so by default this
+program uses an expiration date that is 500 years after you started it.
 
 ## Trusting a Certificate
 
-Self-signed certificates are not trusted by default, so you get security warnings whenever you try to connect to a web service that uses one.  You can work around this by instructing your operating system to trust the certificate.
+Self-signed certificates are not trusted by default, so you get security warnings whenever you try to connect
+to a web service that uses one.  You can work around this by instructing your operating system to trust the
+certificate.
 
-The Windows OS allows you to easily trust new certificates just by double-clicking on the certificate file and going through the certificate installation process.  Specifically, I find that you need to choose the "Local Machine" store location and place your certificates in the "Trusted Root Certification Authorities" certificate store.  Try my [Certificate Trust Manager](https://github.com/bp2008/CertTrustManager) program to make this idiot-proof.
+The Windows OS allows you to easily trust new certificates just by double-clicking on the certificate file and
+going through the certificate installation process.  Specifically, I find that you need to choose the 
+"Local Machine" store location and place your certificates in the "Trusted Root Certification Authorities"
+certificate store.  Try my [Certificate Trust Manager](https://github.com/bp2008/CertTrustManager) program
+to make this idiot-proof.
 
-If you simply want a system to trust a certificate, you only need the signed public certificate (the `.cer` file if you are using the `.cer and .key` format). You can safely give the `.cer` file to anyone without compromising your private key.  `.pfx` files created by this program contain both the public and private keys, so you should keep them secure.
+If you simply want a system to trust a certificate, you only need the signed public certificate (the `.cer` file if
+you are using the `.cer and .key` format). You can safely give the `.cer` file to anyone without compromising
+your private key.  `.pfx` files created by this program contain both the public and private keys, so you should
+keep them secure.
 
-The `.cer and .key` format is common on Linux.  These are actually equivalent to `.pem` files, but I chose to use the extensions `.cer` and `.key` in order to differentiate between the public certificates and private keys.
+The `.cer and .key` format is common on Linux.  These are actually equivalent to `.pem` files, but I chose to use
+the extensions `.cer` and `.key` in order to differentiate between the public certificates and private keys.
 
-If you want to use the certificate with IIS on Windows, you need to install both public and private keys, which in this case is easiest to do by installing the `.pfx` file to your Local Machine "Personal" certificate store.
+If you want to use the certificate with IIS on Windows, you need to install both public and private keys, which
+in this case is easiest to do by installing the `.pfx` file to your Local Machine "Personal" certificate store.
 
-*Be careful when trusting and sharing certificates.  If someone untrustworthy got ahold of the private key, they could use it to fool your computer into trusting any certificate they want!*
+*Be careful when trusting and sharing certificates.  If someone untrustworthy got ahold of the private key,
+they could use it to fool your computer into trusting any certificate they want!*
 
 ## Creating Your Own Certificate Authority
 
-When you need to create many trusted certificates, it can be useful to sign them all with a common root certificate known as a **Certificate Authority** or "CA".  This way, you can have your operating system trust your CA, then any certificate your CA signs will automatically be trusted.
+When you need to create many trusted certificates, it can be useful to sign them all with a common root
+certificate known as a **Certificate Authority** or "CA".  This way, you can have your operating system
+trust your CA, then any certificate your CA signs will automatically be trusted.
 
-You can create a CA with this app by using the `CA` preset button before you click `Make Certificate`.  CA certificates are placed in the `Documents/SSL-Certificates/CertificateAuthority` subfolder and become selectable in the `Certificate Authority` dropdown list.  Choose your CA from the Certificate Authority dropdown list to sign new certificates with your CA.
+You can create a CA with this app by using the `CA` preset button before you click `Make Certificate`.  CA
+certificates are placed in the `Documents/SSL-Certificates/CertificateAuthority` subfolder and become selectable
+in the `Certificate Authority` dropdown list.  Choose your CA from the Certificate Authority dropdown list to
+sign new certificates with your CA. In order for validation of new certificates, this root CA certificate needs
+to also provider a Certificate Revocation List Distribution Point (CDP) or an OCSP Responder URL, in order
+to check if a certificate has not been revoked. If you want to use a Certificate Revocation List Distribution Point,
+You first create a Revocation List in the Revocation List tab, and there you can save the Revocation List as a .crl
+file. Now you put that file on a webserver as static file, and the url to that file you put in the field
+CRL Distribution Point (CPD). If that url is working, the OS now checks a certificate issued with your CA
+certificate for a valid status by fetching and comparing the .cls file.
 
-In this screenshot, I have instructed my computer to trust "My Very Trustworthy Certificate Authority".  Then I signed another certificate "MyESXiServer" with it, and now both are trusted.
+In this screenshot, I have instructed my computer to trust "My Very Trustworthy Certificate Authority".
+Then I signed another certificate "MyESXiServer" with it, and now both are trusted.
 
 ![Trusted Certificate Chain](https://i.imgur.com/8tVWpbr.png)
 
 ## Converting .cer and .key to .pfx, and vice-versa
 
-This program also includes the ability to convert certificates and private keys between the `.cer and .key` and `.pfx` formats, via the Convert tab at the top.
+This program also includes the ability to convert certificates and private keys between the `.cer and .key`
+and `.pfx` formats, via the Convert tab at the top.
 
 ![Screenshot of Convert Certificates Panel](https://github.com/simonegli8/SSL-Certificate-Maker/blob/master/Resources/Screenshot.Convert.png?raw=true)
