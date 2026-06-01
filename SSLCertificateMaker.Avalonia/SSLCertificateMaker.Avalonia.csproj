@@ -11,7 +11,7 @@
 		<AssemblyName>SSLCertificateMaker.Avalonia</AssemblyName>
 		<Product>SSL-Certificate Maker</Product>
 		<Copyright>Copyright © 2026</Copyright>
-		<OutputType Condition="$(TagretFramework) != 'netstandard2.0'">Exe</OutputType>
+		<OutputType Condition="$(TagretFramework) != 'netstandard2.0'">WinExe</OutputType>
 		<ApplicationIcon>cert.ico</ApplicationIcon>
 		<LangVersion>14</LangVersion>
 		<GenerateBootstrapperOnBuild>true</GenerateBootstrapperOnBuild>
