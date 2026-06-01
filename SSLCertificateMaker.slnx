@@ -6,5 +6,4 @@
   </Folder>
   <Project Path="SSLCertificateMaker.Avalonia/SSLCertificateMaker.Avalonia.csproj" />
   <Project Path="SSLCertificateMaker.Library/SSLCertificateMaker.Library.csproj" />
-  <Project Path="SSLCertificateMaker.WinForms/SSLCertificateMaker.WinForms.csproj" />
 </Solution>
