@@ -4,7 +4,6 @@
 		<TargetFrameworks Condition="$(PackAsTool) == 'true'">net10.0</TargetFrameworks>
 		<TargetFrameworks Condition="$(PackAsTool) != 'true'">net10.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
-		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -12,7 +11,7 @@
 		<AssemblyName>SSLCertificateMaker.Avalonia</AssemblyName>
 		<Product>SSL-Certificate Maker</Product>
 		<Copyright>Copyright © 2026</Copyright>
-		<OutputType Condition="$(TagretFramework) != 'netstandard2.0'">WinExe</OutputType>
+		<OutputType Condition="$(TagretFramework) != 'netstandard2.0'">Exe</OutputType>
 		<ApplicationIcon>cert.ico</ApplicationIcon>
 		<LangVersion>14</LangVersion>
 		<GenerateBootstrapperOnBuild>true</GenerateBootstrapperOnBuild>
@@ -33,13 +32,10 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<IncludeSymbols>true</IncludeSymbols>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 		<ToolCommandName>sslcertmaker</ToolCommandName>
 		<PackageOutputPath>../nupkg</PackageOutputPath>
-		<IncludeBuildOutput>true</IncludeBuildOutput>
-		<Configurations>Debug;Release</Configurations>
         <RestoreSources>$(RestoreSources);..\nupkg;https://api.nuget.org/v3/index.json</RestoreSources>
     </PropertyGroup>
 
@@ -80,7 +76,7 @@
 		<PackageReference Include="AvaloniaDialogs" Version="3.7.1" />
 		<PackageReference Include="Xaml.Behaviors.Interactions" Version="12.0.0.1" />
         <PackageReference Include="Xaml.Behaviors.Interactivity" Version="12.0.0.1" />
-		<PackageReference Include="DotnetRuntimeBootstrapper" Version="2.5.4" />
+		<!--<PackageReference Include="DotnetRuntimeBootstrapper" Version="2.5.4" />-->
         <PackageReference Condition="$(PackAsTool) == 'true'" Include="GUIToolInstaller" Version="1.0.13" />
 	</ItemGroup>
 
