@@ -73,9 +73,9 @@ You can create a CA with this app by using the `CA` preset button before you cli
 certificates are placed in the `Documents/SSL-Certificates/CertificateAuthority` subfolder and become selectable
 in the `Certificate Authority` dropdown list.  Choose your CA from the Certificate Authority dropdown list to
 sign new certificates with your CA. In order for validation of new certificates, this root CA certificate needs
-to also provider a Certificate Revocation List Distribution Point (CDP) or an OCSP Responder URL, in order
+to also provide a Certificate Revocation List Distribution Point (CDP) or an OCSP Responder URL, in order
 to check if a certificate has not been revoked. If you want to use a Certificate Revocation List Distribution Point,
-You first create a Revocation List in the Revocation List tab, and there you can save the Revocation List as a .crl
+you first create a Revocation List in the Revocation List tab, and there you can save the Revocation List as a .crl
 file. Now you put that file on a webserver as static file, and the url to that file you put in the field
 CRL Distribution Point (CPD). If that url is working, the OS now checks a certificate issued with your CA
 certificate for a valid status by fetching and comparing the .cls file.
