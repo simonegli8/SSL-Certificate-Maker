@@ -188,7 +188,7 @@ namespace SSLCertificateMaker.Avalonia
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
             var version = typeof(MainWindow).Assembly.GetName().Version;
-            Title += $" {version.Major}.{version.Minor}";
+            Title += $" {version!.ToString(3)}";
 
             // Dates
             ValidFromDatePicker.SelectedDate = DateTime.Today.AddYears(-10);
