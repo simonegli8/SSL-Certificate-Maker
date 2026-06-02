@@ -12,7 +12,7 @@
 		<Product>SSL-Certificate Maker</Product>
 		<Copyright>Copyright © 2026</Copyright>
 		<OutputType Condition="$(TagretFramework) != 'netstandard2.0'">WinExe</OutputType>
-		<ApplicationIcon>cert.ico</ApplicationIcon>
+		<ApplicationIcon>Resources/cert.ico</ApplicationIcon>
 		<LangVersion>14</LangVersion>
 		<GenerateBootstrapperOnBuild>true</GenerateBootstrapperOnBuild>
 
@@ -39,7 +39,7 @@
         <RestoreSources>$(RestoreSources);..\nupkg;https://api.nuget.org/v3/index.json</RestoreSources>
     </PropertyGroup>
 
-    <PropertyGroup  Condition="$(PackAsTool) == 'true'">
+    <PropertyGroup Condition="$(PackAsTool) == 'true'">
         <DefineConstants>$(DefineConstants);PackAsTool</DefineConstants>
     </PropertyGroup>
 
@@ -54,15 +54,27 @@
 		<None Remove="pen-white.png" />
 		<None Remove="pen.png" />
 		<None Remove="pen.svg" />
+		<None Remove="Resources\download-gray.png" />
+		<None Remove="Resources\download-white.png" />
+		<None Remove="Resources\download.png" />
+		<None Remove="Resources\upload-gray.png" />
+		<None Remove="Resources\upload-white.png" />
+		<None Remove="Resources\upload.png" />
 	</ItemGroup>
 	<ItemGroup>
-		<AvaloniaResource Include="delete-white.png" />
-		<AvaloniaResource Include="delete-white.svg" />
-		<AvaloniaResource Include="delete.png" />
-		<AvaloniaResource Include="delete.svg" />
-		<AvaloniaResource Include="pen-white.png" />
-		<AvaloniaResource Include="pen.png" />
-		<AvaloniaResource Include="pen.svg" />
+		<AvaloniaResource Include="Resources\delete-white.png" />
+		<AvaloniaResource Include="Resources\delete-white.svg" />
+		<AvaloniaResource Include="Resources\delete.png" />
+		<AvaloniaResource Include="Resources\delete.svg" />
+		<AvaloniaResource Include="Resources\download-gray.png" />
+		<AvaloniaResource Include="Resources\download-white.png" />
+		<AvaloniaResource Include="Resources\download.png" />
+		<AvaloniaResource Include="Resources\pen-white.png" />
+		<AvaloniaResource Include="Resources\pen.png" />
+		<AvaloniaResource Include="Resources\pen.svg" />
+		<AvaloniaResource Include="Resources\upload-gray.png" />
+		<AvaloniaResource Include="Resources\upload-white.png" />
+		<AvaloniaResource Include="Resources\upload.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -102,7 +114,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="cert.ico" />
+		<Content Include="Resources\cert.ico" />
 	</ItemGroup>
 
 	<ItemGroup>

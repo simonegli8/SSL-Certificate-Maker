@@ -1,5 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
+using Avalonia.Data.Converters;
+using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -12,6 +16,7 @@ using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Utilities;
 using SSLCertificateMaker.Library;
 using System;
 using System.Collections.Generic;
@@ -21,12 +26,14 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.Arm;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Security.Cryptography.X509Certificates;
 
 namespace SSLCertificateMaker.Avalonia
 {
@@ -179,10 +186,19 @@ namespace SSLCertificateMaker.Avalonia
                     if (issuerCombo == IssuerCombo) issuerCombo.SelectedItem = SelfSignedLabel;
                     else issuerCombo.SelectedIndex = 0;
                 }
+
+                if (issuerCombo == IssuerCombo)
+                {
+                    CopyIssuerButton.IsEnabled = !string.IsNullOrEmpty(item) && item != SelfSignedLabel && item != OpenFile;
+                } else
+                {
+                    CopyCertButton.IsEnabled = !string.IsNullOrEmpty(item) && item != SelfSignedLabel && item != OpenFile;
+                }
             }
         }
 
         bool userClickedTab = false;
+        bool isOpen = true;
         private void InitializeUi()
         {
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -238,6 +254,30 @@ namespace SSLCertificateMaker.Avalonia
                 if (KeyUsageBox.IsVisible) KeyUsageBox.IsVisible = false;
                 AdvancedBox.IsVisible = !AdvancedBox.IsVisible;
             };
+            CopyIssuerButton.Click += async (_,_) =>
+            {
+                await CopyToClipboard(Path.Combine(CaDirectory, IssuerCombo.SelectedItem as string));
+                await SetStatus($"Copied {IssuerCombo.SelectedItem} to clipboard.");
+            };
+            PasteIssuerButton.Click += async (_, _) =>
+            {
+                var file = await PasteFromClipboard();
+                PopulateIssuerDropdown(IssuerCombo);
+                SetStatus($"Pasted {file} from clipboad.");
+            };
+            
+            CopyCertButton.Click += async (_, _) =>
+            {
+                await CopyToClipboard(Path.Combine(CertDirectory, CertificateCombo.SelectedItem as string));
+                await SetStatus($"Copied {CertificateCombo.SelectedItem} to clipboard.");
+            };
+            PasteCertButton.Click += async (_, _) =>
+            {
+                var file = await PasteFromClipboard();
+                PopulateIssuerDropdown(CertificateCombo);
+                SetStatus($"Pasted {file} from clipboad.");
+            };
+
             CertificateCombo.DropDownOpened += (_, _) => PopulateConvertDropdown();
             CertificateCombo.SelectionChanged += (_, args) =>
             {
@@ -254,7 +294,10 @@ namespace SSLCertificateMaker.Avalonia
                 {
                     ConvertButton.Content = "Convert to .pfx";
                 }
+                CopyCertButton.IsEnabled = !string.IsNullOrEmpty(item);
+                SetTheme();
             };
+             
             foreach (var tabItem in tabControl.Items.OfType<TabItem>())
             {
                 tabItem.PointerReleased += (sender, e) =>
@@ -285,6 +328,36 @@ namespace SSLCertificateMaker.Avalonia
 
             Application.Current!.PropertyChanged += SetTheme;
             SetTheme();
+
+            Closed += (_,_) => isOpen = false;
+
+            // Poll clipboard to update enabled state of paste buttons
+            Task.Run(async () =>
+            {
+                while (isOpen)
+                {
+                    try
+                    {
+                        var clipboardFile = await CanPasteFromClipboard();
+                        await Dispatcher.UIThread.InvokeAsync(async () =>
+                        {
+                            PasteIssuerButton.IsEnabled = PasteCertButton.IsEnabled = clipboardFile != null;
+                            if (clipboardFile != null)
+                            {
+                                ToolTip.SetTip(PasteIssuerButton, $"Save {clipboardFile} from Clipboard.");
+                                ToolTip.SetTip(PasteCertButton, $"Save {clipboardFile} from Clipboard.");
+                            } else
+                            {
+                                ToolTip.SetTip(PasteIssuerButton, "Save Certificate from Clipboard (To copy over RDP, if you run another remote SSL-Certificate - Maker instance in RDP)");
+                                ToolTip.SetTip(PasteIssuerButton, "Save Certificate from Clipboard (To copy over RDP, if you run another remote SSL-Certificate - Maker instance in RDP)");
+                            }
+                            SetTheme();
+                       });
+                    }
+                    catch { }
+                    await Task.Delay(1000);
+                }
+            });
         }
 
         protected override void OnClosed(EventArgs e)
@@ -317,11 +390,74 @@ namespace SSLCertificateMaker.Avalonia
                 var isDark = Application.Current?.ActualThemeVariant == ThemeVariant.Dark;
                 if (isDark)
                 {
-                    PenImage1.Source = PenImage2.Source = PenImage3.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/pen-white.png")));
+                    PenImage1.Source = PenImage2.Source = PenImage3.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/pen-white.png")));
+                    if (CopyIssuerButton.IsEnabled)
+                    {
+                        CopyIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload-white.png")));
+                    } else
+                    {
+                        CopyIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload-gray.png")));
+                    }
+                    if (PasteIssuerButton.IsEnabled)
+                    {
+                        PasteIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download-white.png")));
+                    }
+                    else
+                    {
+                        PasteIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download-gray.png")));
+                    }
+                    if (CopyCertButton.IsEnabled)
+                    {
+                        CopyCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload-white.png")));
+                    }
+                    else
+                    {
+                        CopyCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload-gray.png")));
+                    }
+                    if (PasteCertButton.IsEnabled)
+                    {
+                        PasteCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download-white.png")));
+                    }
+                    else
+                    {
+                        PasteCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download-gray.png")));
+                    }
                 }
                 else
                 {
-                    PenImage1.Source = PenImage2.Source = PenImage3.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/pen.png")));
+                    PenImage1.Source = PenImage2.Source = PenImage3.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/pen.png")));
+                    if (CopyIssuerButton.IsEnabled)
+                    {
+                        CopyIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload.png")));
+                    }
+                    else
+                    {
+                        CopyIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload-gray.png")));
+                    }
+                    if (PasteIssuerButton.IsEnabled)
+                    {
+                        PasteIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download.png")));
+                    }
+                    else
+                    {
+                        PasteIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download-gray.png")));
+                    }
+                    if (CopyCertButton.IsEnabled)
+                    {
+                        CopyCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload.png")));
+                    }
+                    else
+                    {
+                        CopyCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload-gray.png")));
+                    }
+                    if (PasteCertButton.IsEnabled)
+                    {
+                        PasteCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download.png")));
+                    }
+                    else
+                    {
+                        PasteCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download-gray.png")));
+                    }
                 }
                 PopulateRevokeItems();
             }
@@ -900,6 +1036,14 @@ namespace SSLCertificateMaker.Avalonia
         }
         private async Task MakeCertificate(MakeCertArgs args, CancellationToken token)
         {
+            if (!args.SaveCerAndKey && string.IsNullOrEmpty(args.Password))
+            {
+
+                await SetStatus("No password specified.");
+                await ShowError("No Password", "Please enter a password for the .pfx file.");
+                return;
+            }
+
             Directory.CreateDirectory(CaDirectory);
             Directory.CreateDirectory(CertDirectory);
 
@@ -922,26 +1066,26 @@ namespace SSLCertificateMaker.Avalonia
                     FileTypeChoices = args.SaveCerAndKey
                         ? new[]
                         {
-                        new FilePickerFileType("Certificate Files") {
-                            Patterns = IsWindows ? new[] { "*.key", "*.cer" } :
-                                new[] { "*.key", "*.cer", "application/pkix-cert", "application/x-x509-ca-cert",
-                                "application/x-pem-file", "application/x-pem-key", "application/pkcs8",
-                                "application/pkcs8-encrypted" }
-                        },
-                        new FilePickerFileType("All Files") {
-                            Patterns = IsWindows ? new[] { "*.*" } : new[] { "*.*", "*" }
-                        }
+                            new FilePickerFileType("Certificate Files") {
+                                Patterns = IsWindows ? new[] { "*.key", "*.cer" } :
+                                    new[] { "*.key", "*.cer", "application/pkix-cert", "application/x-x509-ca-cert",
+                                    "application/x-pem-file", "application/x-pem-key", "application/pkcs8",
+                                    "application/pkcs8-encrypted" }
+                            },
+                            new FilePickerFileType("All Files") {
+                                Patterns = IsWindows ? new[] { "*.*" } : new[] { "*.*", "*" }
+                            }
                         }
                         : new[]
                         {
-                        new FilePickerFileType("Certificate Files") {
-                            Patterns = IsWindows ? new[] { "*.pfx" } :
-                                new[] { "*.pfx", "application/x-pkcs12", "application/pkcs12" }
-                        },
-                        new FilePickerFileType("All Files")
-                        {
-                            Patterns = IsWindows ? new[] { "*.*" } : new[] { "*.*", "*" }
-                        }
+                            new FilePickerFileType("Certificate Files") {
+                                Patterns = IsWindows ? new[] { "*.pfx" } :
+                                    new[] { "*.pfx", "application/x-pkcs12", "application/pkcs12" }
+                            },
+                            new FilePickerFileType("All Files")
+                            {
+                                Patterns = IsWindows ? new[] { "*.*" } : new[] { "*.*", "*" }
+                            }
                         },
                     DefaultExtension = args.SaveCerAndKey ? "cer" : "pfx",
                     SuggestedFileName = Path.GetFileName(safeFileName) + (args.SaveCerAndKey ? ".cer" : ".pfx"),
@@ -1149,6 +1293,106 @@ namespace SSLCertificateMaker.Avalonia
             RevokeItems.Load();
             RevokeItems.Remove(item.SerialNumber);
             RevokeItems.Save();
+        }
+
+        DataFormat<byte[]> CertificateApplicationFormat = DataFormat.CreateBytesApplicationFormat("application-x-sslcertificatemaker");
+        byte[] IntToBytes(int value)
+        {
+            byte[] bytes = BitConverter.GetBytes((Int32)value);
+            if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
+            return bytes;
+        }
+
+        int BytesToInt(byte[] bytes)
+        {
+            if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
+            return (int)BitConverter.ToInt32(bytes, 0);
+        }
+        byte[] WriteItem(string filePath)
+        {
+            string localPath;
+            var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            if (filePath.StartsWith(documents, StringComparison.OrdinalIgnoreCase))
+            {
+                localPath = filePath.Substring(documents.Length).Replace(Path.DirectorySeparatorChar, '/');
+            }
+            else
+            {
+                localPath = Path.GetFileName(filePath);
+            }
+            var localPathData = Encoding.UTF8.GetBytes(localPath);
+            var fileData = File.ReadAllBytes(filePath);
+            return IntToBytes(localPathData.Length)
+                .Concat(IntToBytes(fileData.Length))
+                .Concat(localPathData)
+                .Concat(fileData)
+                .ToArray();
+        }
+        void ReadItem(byte[] data, out string filePath, out byte[] fileData)
+        {
+            int localPathLength = BytesToInt(data.Take(4).ToArray());
+            int fileDataLength = BytesToInt(data.Skip(4).Take(4).ToArray());
+            string localPath = Encoding.UTF8.GetString(data.Skip(8).Take(localPathLength).ToArray());
+            fileData = data.Skip(8 + localPathLength).Take(fileDataLength).ToArray();
+            var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            if (localPath.StartsWith("/"))
+            {
+                filePath = Path.Combine(documents, localPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+            }
+            else
+            {
+                filePath = Path.Combine(documents, localPath);
+            }
+        }
+        public async Task CopyToClipboard(string? filePath)
+        {
+            if (string.IsNullOrEmpty(filePath)) return;
+            if (!File.Exists(filePath)) throw new FileNotFoundException("File not found", filePath);
+            if (!filePath.EndsWith(".pfx", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Only .pfx files are supported for clipboard copy.");
+            
+            byte[] fileData = WriteItem(filePath);
+
+            var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+            if (clipboard != null)
+            {
+                var data = new DataTransfer();
+                data.Add(DataTransferItem.Create<byte[]>(CertificateApplicationFormat, fileData));
+                await clipboard.SetDataAsync(data);
+            }           
+        }
+
+        public async Task<string?> CanPasteFromClipboard()
+        {
+            return await Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+                if (clipboard != null)
+                {
+                    var bytes = await clipboard.TryGetValueAsync<byte[]>(CertificateApplicationFormat);
+                    if (bytes != null)
+                    {
+                        ReadItem(bytes, out string filePath, out byte[] fileData);
+                        return Path.GetFileName(filePath);
+                    }
+                }
+                return null;
+            });
+        }
+        public async Task<string> PasteFromClipboard()
+        {
+            var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
+            if (clipboard != null)
+            {
+                var bytes = await clipboard.TryGetValueAsync<byte[]>(CertificateApplicationFormat);
+                if (bytes != null)
+                {
+                    ReadItem(bytes, out string filePath, out byte[] fileData);
+                    File.WriteAllBytes(filePath, fileData);
+                    return Path.GetFileName(filePath);
+                }
+            }
+            return null;
         }
     }
 }

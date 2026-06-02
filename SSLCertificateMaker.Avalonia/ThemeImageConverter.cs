@@ -15,8 +15,8 @@ public class ThemeToDeleteIconConverter : IValueConverter
     {
         var theme = Application.Current?.ActualThemeVariant;
         return theme == ThemeVariant.Dark
-            ? new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/delete-white.png")))
-            : new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/delete.png")));
+            ? new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/delete-white.png")))
+            : new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/delete.png")));
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
