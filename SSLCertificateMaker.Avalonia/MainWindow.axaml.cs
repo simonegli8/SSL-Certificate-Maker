@@ -1046,19 +1046,27 @@ namespace SSLCertificateMaker.Avalonia
             {
                 File.WriteAllBytes(safeFileName + ".cer", certBundle.GetPublicCertAsCerFile());
                 File.WriteAllBytes(safeFileName + ".key", certBundle.GetPrivateKeyAsKeyFile());
-                if (LooksLikeCa(args))
+                if (LooksLikeCa(args) && Path.GetDirectoryName(safeFileName) != CaDirectory)
                 {
-                    File.Copy(safeFileName + ".cer", Path.Combine(CaDirectory, Path.GetFileName(safeFileName + ".cer")));
-                    File.Copy(safeFileName + ".key", Path.Combine(CaDirectory, Path.GetFileName(safeFileName + ".key")));
+                    try
+                    {
+                        File.Copy(safeFileName + ".cer", Path.Combine(CaDirectory, Path.GetFileName(safeFileName + ".cer")));
+                        File.Copy(safeFileName + ".key", Path.Combine(CaDirectory, Path.GetFileName(safeFileName + ".key")));
+                    } catch {
+                    }
                 }
             }
             else
             {
                 var password = string.IsNullOrEmpty(args.Password) ? null : args.Password;
                 File.WriteAllBytes(safeFileName + ".pfx", certBundle.GetPfx(password));
-                if (LooksLikeCa(args))
+                if (LooksLikeCa(args) && Path.GetDirectoryName(safeFileName) != CaDirectory)
                 {
-                    File.Copy(safeFileName + ".pfx", Path.Combine(CaDirectory, Path.GetFileName(safeFileName + ".pfx")));
+                    try
+                    {
+                        File.Copy(safeFileName + ".pfx", Path.Combine(CaDirectory, Path.GetFileName(safeFileName + ".pfx")), true);
+                    }
+                    catch { }
                 }
             }
 
