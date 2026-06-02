@@ -189,10 +189,12 @@ namespace SSLCertificateMaker.Avalonia
 
                 if (issuerCombo == IssuerCombo)
                 {
-                    CopyIssuerButton.IsEnabled = !string.IsNullOrEmpty(item) && item != SelfSignedLabel && item != OpenFile;
+                    CopyIssuerButton.IsEnabled = item is not null && item != SelfSignedLabel &&
+                        item != OpenFile && item.EndsWith(".pfx", StringComparison.OrdinalIgnoreCase);
                 } else
                 {
-                    CopyCertButton.IsEnabled = !string.IsNullOrEmpty(item) && item != SelfSignedLabel && item != OpenFile;
+                    CopyCertButton.IsEnabled = item is not null && item != SelfSignedLabel && item != OpenFile &&
+                         item.EndsWith(".pfx", StringComparison.OrdinalIgnoreCase);
                 }
             }
         }
@@ -256,8 +258,15 @@ namespace SSLCertificateMaker.Avalonia
             };
             CopyIssuerButton.Click += async (_,_) =>
             {
-                await CopyToClipboard(Path.Combine(CaDirectory, IssuerCombo.SelectedItem as string));
-                await SetStatus($"Copied {IssuerCombo.SelectedItem} to clipboard.");
+                var file = IssuerCombo.SelectedItem as string;
+                if (file != null && file.EndsWith(".pfx", StringComparison.OrdinalIgnoreCase))
+                {
+                    await CopyToClipboard(Path.Combine(CaDirectory, file));
+                    await SetStatus($"Copied {file} to clipboard.");
+                } else
+                {
+                    await SetStatus("Only .pfx files can be copied to clipbard.");
+                }
             };
             PasteIssuerButton.Click += async (_, _) =>
             {
@@ -268,8 +277,15 @@ namespace SSLCertificateMaker.Avalonia
             
             CopyCertButton.Click += async (_, _) =>
             {
-                await CopyToClipboard(Path.Combine(CertDirectory, CertificateCombo.SelectedItem as string));
-                await SetStatus($"Copied {CertificateCombo.SelectedItem} to clipboard.");
+                var file = CertificateCombo.SelectedItem as string;
+                if (file != null && file.EndsWith(".pfx", StringComparison.OrdinalIgnoreCase))
+                {
+                    await CopyToClipboard(Path.Combine(CertDirectory, file));
+                    await SetStatus($"Copied {file} to clipboard.");
+                } else
+                {
+                    await SetStatus("Only .pfx files can be copied to clipbard.");
+                }
             };
             PasteCertButton.Click += async (_, _) =>
             {
@@ -294,7 +310,7 @@ namespace SSLCertificateMaker.Avalonia
                 {
                     ConvertButton.Content = "Convert to .pfx";
                 }
-                CopyCertButton.IsEnabled = !string.IsNullOrEmpty(item);
+                CopyCertButton.IsEnabled = item is not null && item.EndsWith(".pfx", StringComparison.OrdinalIgnoreCase);
                 SetTheme();
             };
              
@@ -1295,7 +1311,7 @@ namespace SSLCertificateMaker.Avalonia
             RevokeItems.Save();
         }
 
-        const string FormatID = "application-x-sslcertificatemaker";
+        const string FormatID = "application/x-sslcertificatemaker\n";
         // Use DataFormat.Text, since custom application format does not work on XFCE
         //DataFormat<string> CertificateDataFormat = DataFormat.CreateStringApplicationFormat(FormatID);
         DataFormat<string> CertificateDataFormat = DataFormat.Text;
@@ -1330,7 +1346,7 @@ namespace SSLCertificateMaker.Avalonia
                 .Concat(IntToBytes(fileData.Length))
                 .Concat(localPathData)
                 .Concat(fileData)
-                .ToArray());
+                .ToArray(), Base64FormattingOptions.InsertLineBreaks);
         }
         bool ReadItem(string bin64data, out string? filePath, out byte[]? fileData)
         {
