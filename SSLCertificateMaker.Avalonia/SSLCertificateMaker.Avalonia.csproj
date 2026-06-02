@@ -58,6 +58,8 @@
 		<None Remove="Resources\download-gray.png" />
 		<None Remove="Resources\download-white.png" />
 		<None Remove="Resources\download.png" />
+		<None Remove="Resources\menu-white.png" />
+		<None Remove="Resources\menu.png" />
 		<None Remove="Resources\upload-gray.png" />
 		<None Remove="Resources\upload-white.png" />
 		<None Remove="Resources\upload.png" />
@@ -70,6 +72,8 @@
 		<AvaloniaResource Include="Resources\download-gray.png" />
 		<AvaloniaResource Include="Resources\download-white.png" />
 		<AvaloniaResource Include="Resources\download.png" />
+		<AvaloniaResource Include="Resources\menu-white.png" />
+		<AvaloniaResource Include="Resources\menu.png" />
 		<AvaloniaResource Include="Resources\pen-white.png" />
 		<AvaloniaResource Include="Resources\pen.png" />
 		<AvaloniaResource Include="Resources\pen.svg" />

@@ -17,7 +17,7 @@
 
     <dialogHost:DialogHost Identifier="RootDialog" CloseOnClickAway="True">
         <Grid RowDefinitions="*,Auto" RowSpacing="5" ColumnSpacing="5">
-            <TabControl Grid.Row="0" x:Name="tabControl">
+          <TabControl Grid.Row="0" x:Name="tabControl">
                 <TabItem Header="New Certificate">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <Grid ColumnDefinitions="Auto,*" Margin="8" RowSpacing="3" ColumnSpacing="3">
@@ -251,6 +251,19 @@
                 </TabItem>
 
             </TabControl>
+            
+            <!-- Menu <StackPanel Grid.Row="0">
+                <Button x:Name="MenuButton" HorizontalAlignment="Right">
+                    <Image x:Name="MenuImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/menu-white.png" />
+                </Button>
+                <Border x:Name="ContextMenu" HorizontalAlignment="Right" ZIndex="100"
+                        Background="#fff3f3f3">
+                    <StackPanel>
+                        <Button x:Name="InstallButton" Content="Install SSL-Certificate-Maker" HorizontalAlignment="Stretch" />
+                        <Button x:Name="UninstallButton" Content="Uninstall SSL-Certificate-Maker" HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>-->
 
             <!-- Status bar -->
             <DockPanel Grid.Row="1" LastChildFill="True">
