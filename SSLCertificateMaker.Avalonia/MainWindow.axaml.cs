@@ -1007,7 +1007,7 @@ namespace SSLCertificateMaker.Avalonia
                         var password = await Dispatcher.UIThread.InvokeAsync(async () =>
                         {
                             var passwordPrompt = new PasswordPrompt();
-                            passwordPrompt.PasswordLabel.Text = "Password for CA pfx:";
+                            passwordPrompt.PasswordLabel.Text = $"Password for {Path.GetFileName(issuerFile)}:";
                             return await passwordPrompt.ShowDialog<string?>(this);
                         });
                         try
