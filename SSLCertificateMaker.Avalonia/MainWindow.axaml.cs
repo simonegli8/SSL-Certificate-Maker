@@ -344,12 +344,12 @@ namespace SSLCertificateMaker.Avalonia
                             PasteIssuerButton.IsEnabled = PasteCertButton.IsEnabled = clipboardFile != null;
                             if (clipboardFile != null)
                             {
-                                ToolTip.SetTip(PasteIssuerButton, $"Save {clipboardFile} from Clipboard.");
-                                ToolTip.SetTip(PasteCertButton, $"Save {clipboardFile} from Clipboard.");
+                                ToolTip.SetTip(PasteIssuerTip, $"Save {clipboardFile} from Clipboard.");
+                                ToolTip.SetTip(PasteCertTip, $"Save {clipboardFile} from Clipboard.");
                             } else
                             {
-                                ToolTip.SetTip(PasteIssuerButton, "Save Certificate from Clipboard (To copy over RDP, if you run another remote SSL-Certificate - Maker instance in RDP)");
-                                ToolTip.SetTip(PasteIssuerButton, "Save Certificate from Clipboard (To copy over RDP, if you run another remote SSL-Certificate - Maker instance in RDP)");
+                                ToolTip.SetTip(PasteIssuerTip, "Save Certificate from Clipboard (To copy over RDP, if you run another remote SSL-Certificate - Maker instance in RDP)");
+                                ToolTip.SetTip(PasteIssuerTip, "Save Certificate from Clipboard (To copy over RDP, if you run another remote SSL-Certificate - Maker instance in RDP)");
                             }
                             SetTheme();
                        });
@@ -1295,7 +1295,10 @@ namespace SSLCertificateMaker.Avalonia
             RevokeItems.Save();
         }
 
-        DataFormat<byte[]> CertificateApplicationFormat = DataFormat.CreateBytesApplicationFormat("application-x-sslcertificatemaker");
+        const string FormatID = "application-x-sslcertificatemaker";
+        // Use DataFormat.Text, since custom application format does not work on XFCE
+        //DataFormat<string> CertificateDataFormat = DataFormat.CreateStringApplicationFormat(FormatID);
+        DataFormat<string> CertificateDataFormat = DataFormat.Text;
         byte[] IntToBytes(int value)
         {
             byte[] bytes = BitConverter.GetBytes((Int32)value);
@@ -1308,7 +1311,7 @@ namespace SSLCertificateMaker.Avalonia
             if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
             return (int)BitConverter.ToInt32(bytes, 0);
         }
-        byte[] WriteItem(string filePath)
+        string WriteItem(string filePath)
         {
             string localPath;
             var documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -1322,14 +1325,23 @@ namespace SSLCertificateMaker.Avalonia
             }
             var localPathData = Encoding.UTF8.GetBytes(localPath);
             var fileData = File.ReadAllBytes(filePath);
-            return IntToBytes(localPathData.Length)
+            return FormatID + System.Convert.ToBase64String(
+                IntToBytes(localPathData.Length)
                 .Concat(IntToBytes(fileData.Length))
                 .Concat(localPathData)
                 .Concat(fileData)
-                .ToArray();
+                .ToArray());
         }
-        void ReadItem(byte[] data, out string filePath, out byte[] fileData)
+        bool ReadItem(string bin64data, out string? filePath, out byte[]? fileData)
         {
+            if (!bin64data.StartsWith(FormatID))
+            {
+                filePath = null;
+                fileData = null;
+                return false;
+            }
+
+            var data = System.Convert.FromBase64String(bin64data.Substring(FormatID.Length));
             int localPathLength = BytesToInt(data.Take(4).ToArray());
             int fileDataLength = BytesToInt(data.Skip(4).Take(4).ToArray());
             string localPath = Encoding.UTF8.GetString(data.Skip(8).Take(localPathLength).ToArray());
@@ -1343,6 +1355,7 @@ namespace SSLCertificateMaker.Avalonia
             {
                 filePath = Path.Combine(documents, localPath);
             }
+            return true;
         }
         public async Task CopyToClipboard(string? filePath)
         {
@@ -1351,14 +1364,16 @@ namespace SSLCertificateMaker.Avalonia
             if (!filePath.EndsWith(".pfx", StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException("Only .pfx files are supported for clipboard copy.");
             
-            byte[] fileData = WriteItem(filePath);
-
             var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
             if (clipboard != null)
             {
+                await clipboard.ClearAsync();
                 var data = new DataTransfer();
-                data.Add(DataTransferItem.Create<byte[]>(CertificateApplicationFormat, fileData));
+                var item = new DataTransferItem();
+                item.Set(CertificateDataFormat, () => WriteItem(filePath));
+                data.Add(item);
                 await clipboard.SetDataAsync(data);
+                //await clipboard.FlushAsync();
             }           
         }
 
@@ -1369,11 +1384,15 @@ namespace SSLCertificateMaker.Avalonia
                 var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
                 if (clipboard != null)
                 {
-                    var bytes = await clipboard.TryGetValueAsync<byte[]>(CertificateApplicationFormat);
-                    if (bytes != null)
+                    using var data = await clipboard.TryGetDataAsync();
+                    if (data is not null)
                     {
-                        ReadItem(bytes, out string filePath, out byte[] fileData);
-                        return Path.GetFileName(filePath);
+                        var item = await data.TryGetValueAsync(CertificateDataFormat);
+                        if (item != null && item.StartsWith(FormatID))
+                        {
+                            if (ReadItem(item, out string filePath, out byte[] fileData)) return Path.GetFileName(filePath);
+                            else return null;
+                        }
                     }
                 }
                 return null;
@@ -1384,12 +1403,18 @@ namespace SSLCertificateMaker.Avalonia
             var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
             if (clipboard != null)
             {
-                var bytes = await clipboard.TryGetValueAsync<byte[]>(CertificateApplicationFormat);
-                if (bytes != null)
+                using var data = await clipboard.TryGetDataAsync();
+                if (data is not null)
                 {
-                    ReadItem(bytes, out string filePath, out byte[] fileData);
-                    File.WriteAllBytes(filePath, fileData);
-                    return Path.GetFileName(filePath);
+                    var item = await data.TryGetValueAsync(CertificateDataFormat);
+                    if (item != null && item.StartsWith(FormatID))
+                    {
+                        if (ReadItem(item, out string? filePath, out byte[]? fileData))
+                        {
+                            File.WriteAllBytes(filePath, fileData);
+                            return Path.GetFileName(filePath);
+                        }
+                    }
                 }
             }
             return null;

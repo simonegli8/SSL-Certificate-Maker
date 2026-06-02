@@ -37,6 +37,7 @@
 		<ToolCommandName>sslcertmaker</ToolCommandName>
 		<PackageOutputPath>../nupkg</PackageOutputPath>
         <RestoreSources>$(RestoreSources);..\nupkg;https://api.nuget.org/v3/index.json</RestoreSources>
+        <DebugType>embedded</DebugType>
     </PropertyGroup>
 
     <PropertyGroup Condition="$(PackAsTool) == 'true'">

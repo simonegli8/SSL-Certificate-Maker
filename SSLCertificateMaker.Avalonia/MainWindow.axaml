@@ -14,100 +14,105 @@
     <Window.Resources>
         <vm:ThemeToDeleteIconConverter x:Key="ThemeToDeleteIconConverter"/>
     </Window.Resources>
-    
-	<dialogHost:DialogHost Identifier="RootDialog" CloseOnClickAway="True">
-		<Grid RowDefinitions="*,Auto" RowSpacing="5" ColumnSpacing="5">
-			<TabControl Grid.Row="0" x:Name="tabControl">
-				<TabItem Header="New Certificate">
-					<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-						<Grid ColumnDefinitions="Auto,*" Margin="8" RowSpacing="3" ColumnSpacing="3">
-							<Grid.RowDefinitions>
-								<RowDefinition Height="Auto" />
-								<RowDefinition Height="*" MinHeight="80"/>
-								<RowDefinition Height="Auto" />
+
+    <dialogHost:DialogHost Identifier="RootDialog" CloseOnClickAway="True">
+        <Grid RowDefinitions="*,Auto" RowSpacing="5" ColumnSpacing="5">
+            <TabControl Grid.Row="0" x:Name="tabControl">
+                <TabItem Header="New Certificate">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <Grid ColumnDefinitions="Auto,*" Margin="8" RowSpacing="3" ColumnSpacing="3">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" MinHeight="80"/>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
-								<RowDefinition Height="Auto" />
-								<RowDefinition Height="Auto" />
-								<RowDefinition Height="Auto" />
-								<RowDefinition Height="Auto" />
-								<RowDefinition Height="Auto" />
-							</Grid.RowDefinitions>
-							<!-- Header -->
-							<TextBlock Grid.Row="0" Grid.Column="0" Text="Certificate Authority:" VerticalAlignment="Center" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <!-- Header -->
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Certificate Authority:" VerticalAlignment="Center" />
                             <Grid Grid.Row="0" Grid.Column="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
                                 <ComboBox Grid.Column="0" x:Name="IssuerCombo" HorizontalAlignment="Stretch" />
-                                <Button x:Name="CopyIssuerButton" Grid.Column="1" ToolTip.Tip="Copy Certificate to Clipboard (To copy over RDP, if you run another remote SSL-Certificate-Maker instance in RDP)">
-                                    <Image x:Name="CopyIssuerImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/upload.png" />
-                                </Button>
-                                <Button x:Name="PasteIssuerButton" Grid.Column="2" ToolTip.Tip="Save Certificate from Clipboard (To copy over RDP, if you run another remote SSL-Certificate-Maker instance in RDP)">
-                                    <Image x:Name="PasteIssuerImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/download.png" />
-                                </Button>
+                                <StackPanel x:Name="CopyIssuerTip"  Grid.Column="1" ToolTip.Tip="Copy Certificate to Clipboard (To copy over RDP, if you run another remote SSL-Certificate-Maker instance in RDP)">
+                                    <Button x:Name="CopyIssuerButton">
+                                        <Image x:Name="CopyIssuerImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/upload.png" />
+                                    </Button>
+                                </StackPanel>
+                                <StackPanel x:Name="PasteIssuerTip" Grid.Column="2" ToolTip.Tip="Save Certificate from Clipboard (To copy over RDP, if you run another remote SSL-Certificate-Maker instance in RDP)">
+                                    <Button x:Name="PasteIssuerButton">
+                                        <Image x:Name="PasteIssuerImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/download.png" />
+                                    </Button>
+                                </StackPanel>
+
                             </Grid>
-                                
-							<!-- Main content -->
-							<!-- Domains -->
-							<Grid RowDefinitions="Auto,*" Grid.Row="1" Grid.Column="0">
-								<TextBlock Grid.Row="0" Text="Domain Names:" />
-								<TextBlock Grid.Row="1" TextWrapping="Wrap" FontSize="12" Width="120" VerticalAlignment="Center"
+
+                            <!-- Main content -->
+                            <!-- Domains -->
+                            <Grid RowDefinitions="Auto,*" Grid.Row="1" Grid.Column="0">
+                                <TextBlock Grid.Row="0" Text="Domain Names:" />
+                                <TextBlock Grid.Row="1" TextWrapping="Wrap" FontSize="12" Width="120" VerticalAlignment="Center"
 									Text="One per line. First line is Subject Name; others are Subject Alternative Names." />
-							</Grid>
-							<ScrollViewer Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-								<TextBox x:Name="DomainsTextBox" AcceptsReturn="True"
+                            </Grid>
+                            <ScrollViewer Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <TextBox x:Name="DomainsTextBox" AcceptsReturn="True"
 								TextWrapping="Wrap" MinHeight="50" Text="localhost" />
-							</ScrollViewer>
+                            </ScrollViewer>
 
-							<!-- Presets -->
-							<TextBlock Grid.Row="2" Grid.Column="0" Text="Presets:" VerticalAlignment="Center" />
-							<StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8">
-								<Button x:Name="WebServerPresetButton" Content="Web Server" />
-								<Button x:Name="CaPresetButton" Content="Certificate Authority" />
-							</StackPanel>
+                            <!-- Presets -->
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Presets:" VerticalAlignment="Center" />
+                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <Button x:Name="WebServerPresetButton" Content="Web Server" />
+                                <Button x:Name="CaPresetButton" Content="Certificate Authority" />
+                            </StackPanel>
 
-							<!-- Key Usage -->
-							<TextBlock Grid.Row="3" Grid.Column="0" Text="Key Usage:" VerticalAlignment="Center" />
-							<StackPanel Grid.Row="3" Grid.Column="1">
-								<StackPanel Orientation="Horizontal" Spacing="8">
-									<Button x:Name="KeyUsageEditButton">
-										<Image x:Name="PenImage1" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/pen.png" />
-									</Button>
-									<TextBlock x:Name="txtKeyUsage" TextWrapping="Wrap" VerticalAlignment="Center" />
-								</StackPanel>
-								<Border x:Name="KeyUsageBox" BorderThickness="1" CornerRadius="4" BorderBrush="Gray" Margin="4" IsVisible="false">	
-									<ListBox x:Name="KeyUsageListBox" SelectionMode="Multiple">
-										<ListBox.ItemTemplate>
-											<DataTemplate x:DataType="cm:MultiSelectKeyPurposeItem">
-												<CheckBox Content="{Binding Key}"
+                            <!-- Key Usage -->
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Key Usage:" VerticalAlignment="Center" />
+                            <StackPanel Grid.Row="3" Grid.Column="1">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button x:Name="KeyUsageEditButton">
+                                        <Image x:Name="PenImage1" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/pen.png" />
+                                    </Button>
+                                    <TextBlock x:Name="txtKeyUsage" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <Border x:Name="KeyUsageBox" BorderThickness="1" CornerRadius="4" BorderBrush="Gray" Margin="4" IsVisible="false">
+                                    <ListBox x:Name="KeyUsageListBox" SelectionMode="Multiple">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate x:DataType="cm:MultiSelectKeyPurposeItem">
+                                                <CheckBox Content="{Binding Key}"
 														  IsChecked="{Binding IsSelected, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
-											</DataTemplate>
-										</ListBox.ItemTemplate>
-									</ListBox>
-								</Border>
-							</StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Border>
+                            </StackPanel>
 
-							<!-- Extended Key Usage -->
-							<TextBlock Grid.Row="4" Grid.Column="0" Text="Extended Key Usage:" VerticalAlignment="Center" />
-							<StackPanel Grid.Row="4" Grid.Column="1">
-								<StackPanel Orientation="Horizontal" Spacing="8">
-									<Button x:Name="ExtendedKeyUsageEditButton">
-										<Image x:Name="PenImage2" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/pen.png" />
-									</Button>
-									<TextBlock x:Name="txtExtendedKeyUsage" TextWrapping="Wrap" VerticalAlignment="Center" />
-								</StackPanel>
-								<Border x:Name="ExtendedKeyUsageBox" BorderThickness="1" BorderBrush="Gray" CornerRadius="4" IsVisible="false">
-									<ListBox x:Name="ExtendedKeyUsageListBox" SelectionMode="Multiple">
-										<ListBox.ItemTemplate>
-											<DataTemplate x:DataType="cm:MultiSelectIntItem">
-												<CheckBox Content="{Binding Key}"
+                            <!-- Extended Key Usage -->
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Extended Key Usage:" VerticalAlignment="Center" />
+                            <StackPanel Grid.Row="4" Grid.Column="1">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button x:Name="ExtendedKeyUsageEditButton">
+                                        <Image x:Name="PenImage2" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/pen.png" />
+                                    </Button>
+                                    <TextBlock x:Name="txtExtendedKeyUsage" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <Border x:Name="ExtendedKeyUsageBox" BorderThickness="1" BorderBrush="Gray" CornerRadius="4" IsVisible="false">
+                                    <ListBox x:Name="ExtendedKeyUsageListBox" SelectionMode="Multiple">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate x:DataType="cm:MultiSelectIntItem">
+                                                <CheckBox Content="{Binding Key}"
 													IsChecked="{Binding IsSelected, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" />
-											</DataTemplate>
-										</ListBox.ItemTemplate>
-									</ListBox>
-								</Border>
-							</StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Border>
+                            </StackPanel>
 
                             <!-- Advanced -->
                             <TextBlock Grid.Row="5" Grid.Column="0" Text="Advanced:" VerticalAlignment="Center" />
@@ -125,76 +130,83 @@
                                     <TextBox Grid.Row="1" Grid.Column="1" x:Name="OCSPUrl" Text="" />
                                 </Grid>
                             </Border>
-                            
-                            
+
+
                             <!-- Dates -->
-							<TextBlock Grid.Row="7" Grid.Column="0" Text="Valid From:" VerticalAlignment="Center" />
-							<DatePicker Grid.Row="7" Grid.Column="1" x:Name="ValidFromDatePicker" />
+                            <TextBlock Grid.Row="7" Grid.Column="0" Text="Valid From:" VerticalAlignment="Center" />
+                            <DatePicker Grid.Row="7" Grid.Column="1" x:Name="ValidFromDatePicker" />
 
-							<TextBlock Grid.Row="8" Grid.Column="0" Text="Valid Until:" VerticalAlignment="Center" />
-							<DatePicker Grid.Row="8" Grid.Column="1" x:Name="ValidToDatePicker" />
+                            <TextBlock Grid.Row="8" Grid.Column="0" Text="Valid Until:" VerticalAlignment="Center" />
+                            <DatePicker Grid.Row="8" Grid.Column="1" x:Name="ValidToDatePicker" />
 
-							<!-- Key strength -->
-							<TextBlock Grid.Row="9" Grid.Column="0" Text="Key Strength:" VerticalAlignment="Center"
+                            <!-- Key strength -->
+                            <TextBlock Grid.Row="9" Grid.Column="0" Text="Key Strength:" VerticalAlignment="Center"
 								ToolTip.Tip="If generating a certificate to be used as a certificate authority, choose a higher value such as 4096." />
-							<StackPanel Grid.Row="9" Grid.Column="1" Orientation="Horizontal" Spacing="6">
-								<ComboBox x:Name="KeyStrengthComboBox" Width="90" ToolTip.Tip="If generating a certificate to be used as a certificate authority, choose a higher value such as 4096." />
-								<TextBlock Text="Bits (2048 builds fast, 4096 is more secure)" TextWrapping="Wrap" VerticalAlignment="Center"
+                            <StackPanel Grid.Row="9" Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                <ComboBox x:Name="KeyStrengthComboBox" Width="90" ToolTip.Tip="If generating a certificate to be used as a certificate authority, choose a higher value such as 4096." />
+                                <TextBlock Text="Bits (2048 builds fast, 4096 is more secure)" TextWrapping="Wrap" VerticalAlignment="Center"
 									ToolTip.Tip="If generating a certificate to be used as a certificate authority, choose a higher value such as 4096." />
-							</StackPanel>
+                            </StackPanel>
 
-							<!-- Output -->
-							<TextBlock Grid.Row="10" Grid.Column="0" Text="Output Type:" VerticalAlignment="Center" />
-							<ComboBox Grid.Row="10" Grid.Column="1" x:Name="OutputTypeComboBox" Width="120" />
+                            <!-- Output -->
+                            <TextBlock Grid.Row="10" Grid.Column="0" Text="Output Type:" VerticalAlignment="Center" />
+                            <ComboBox Grid.Row="10" Grid.Column="1" x:Name="OutputTypeComboBox" Width="120" />
 
-							<!--Password -->
-							<TextBlock Grid.Row="11" Grid.Column="0" Text="Pfx Password:" VerticalAlignment="Center" />
-							<Grid Grid.Row="11" Grid.Column="1" ColumnDefinitions="*,Auto">
-								<vm:PasswordBox Grid.Column="0" x:Name="PasswordTextBox" HorizontalAlignment="Stretch" />
-							</Grid>
+                            <!--Password -->
+                            <TextBlock Grid.Row="11" Grid.Column="0" Text="Pfx Password:" VerticalAlignment="Center" />
+                            <Grid Grid.Row="11" Grid.Column="1" ColumnDefinitions="*,Auto">
+                                <vm:PasswordBox Grid.Column="0" x:Name="PasswordTextBox" HorizontalAlignment="Stretch" />
+                            </Grid>
 
-							<!-- Action row -->
-							<Border Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2" Padding="4" HorizontalAlignment="Stretch" Margin="10">
-								<StackPanel Spacing="10">
-									<!--<TextBlock Text="The certifiate will be saved in your Documents/SSL-Certificates folder" />-->
-									<Button x:Name="MakeCertButton" Content="Make Certificate" HorizontalAlignment="Right" />
-								</StackPanel>
-							</Border>
-						</Grid>
-					</ScrollViewer>
-				</TabItem>
-				<TabItem Header="Convert">
-					<Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="5" ColumnSpacing="10">
-						<Border Grid.ColumnSpan="2" Margin="0,15">
-							<TextBlock TextWrapping="Wrap">
-								<Run Text="This tool allows you to convert certificates between formats. The supported formats are:" /><LineBreak/>
-								<LineBreak/>
-								<Run Text="1) .pfx" /><LineBreak/>
-								<Run Text="2) .cer and .key (both files must exist, names differing only in their extensions)" /><LineBreak/>
-								<LineBreak/>
-								<Run Text="The files must exist in the Documents/SSL-Certificates in order to be found by this program." />
-							</TextBlock>
-						</Border>
-						<TextBlock Grid.Row="1" Grid.Column="0" Text="Certificate:" />
+                            <!-- Action row -->
+                            <Border Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2" Padding="4" HorizontalAlignment="Stretch" Margin="10">
+                                <StackPanel Spacing="10">
+                                    <!--<TextBlock Text="The certifiate will be saved in your Documents/SSL-Certificates folder" />-->
+                                    <Button x:Name="MakeCertButton" Content="Make Certificate" HorizontalAlignment="Right" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Convert">
+                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="5" ColumnSpacing="10">
+                        <Border Grid.ColumnSpan="2" Margin="0,15">
+                            <TextBlock TextWrapping="Wrap">
+                                <Run Text="This tool allows you to convert certificates between formats. The supported formats are:" />
+                                <LineBreak/>
+                                <LineBreak/>
+                                <Run Text="1) .pfx" />
+                                <LineBreak/>
+                                <Run Text="2) .cer and .key (both files must exist, names differing only in their extensions)" />
+                                <LineBreak/>
+                                <LineBreak/>
+                                <Run Text="The files must exist in the Documents/SSL-Certificates in order to be found by this program." />
+                            </TextBlock>
+                        </Border>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Certificate:" />
                         <Grid Grid.Row="1" Grid.Column="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
                             <ComboBox x:Name="CertificateCombo" HorizontalAlignment="Stretch" />
-                            <Button x:Name="CopyCertButton" Grid.Column="1" ToolTip.Tip="Copy Certificate to Clipboard (To copy over RDP, if you run another remote SSL-Certificate-Maker instance in RDP)">
-                                <Image x:Name="CopyCertImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/upload.png" />
-                            </Button>
-                            <Button x:Name="PasteCertButton" Grid.Column="2" ToolTip.Tip="Save Certificate from Clipboard (To copy over RDP, if you run another remote SSL-Certificate-Maker instance in RDP)">
-                                <Image x:Name="PasteCertImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/download.png" />
-                            </Button>
+                            <StackPanel x:Name="CopyCertTip" Grid.Column="1" ToolTip.Tip="Copy Certificate to Clipboard (To copy over RDP, if you run another remote SSL-Certificate-Maker instance in RDP)">
+                                <Button x:Name="CopyCertButton">
+                                    <Image x:Name="CopyCertImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/upload.png" />
+                                </Button>
+                            </StackPanel>
+                            <StackPanel x:Name="PasteCertTip" Grid.Column="2" ToolTip.Tip="Save Certificate from Clipboard (To copy over RDP, if you run another remote SSL-Certificate-Maker instance in RDP)">
+                                <Button x:Name="PasteCertButton">
+                                    <Image x:Name="PasteCertImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/download.png" />
+                                </Button>
+                            </StackPanel>
                         </Grid>
-                        
+
                         <!-- Action row -->
-						<Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Padding="4" HorizontalAlignment="Stretch" Margin="10">
-							<StackPanel Spacing="10">
-								<TextBlock Text="The converted certifiate will be saved in your Documents/SSL-Certificates folder" />
-								<Button x:Name="ConvertButton" Content="Convert" HorizontalAlignment="Right" />
-							</StackPanel>
-						</Border>
-					</Grid>
-				</TabItem>
+                        <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Padding="4" HorizontalAlignment="Stretch" Margin="10">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="The converted certifiate will be saved in your Documents/SSL-Certificates folder" />
+                                <Button x:Name="ConvertButton" Content="Convert" HorizontalAlignment="Right" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </TabItem>
                 <TabItem Header="Revocation List">
                     <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,*,Auto,Auto,Auto" Margin="10">
                         <!-- Header -->
@@ -220,7 +232,7 @@
                                 </ListBox.ItemTemplate>
                             </ListBox>
                         </Border>
-                        
+
                         <!-- Dates -->
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="Last Update:" VerticalAlignment="Center" />
                         <DatePicker Grid.Row="3" Grid.Column="1" x:Name="LastUpdateDatePicker" />
@@ -237,14 +249,14 @@
                         </Border>
                     </Grid>
                 </TabItem>
-            
+
             </TabControl>
 
-			<!-- Status bar -->
-			<DockPanel Grid.Row="1" LastChildFill="True">
-				<ProgressBar x:Name="ProgressBar" Width="120" Height="16" IsIndeterminate="False" />
-				<TextBlock x:Name="StatusTextBlock" VerticalAlignment="Center" Text="Ready" TextWrapping="Wrap" Margin="10,0" />
-			</DockPanel>
-		</Grid>
-	</dialogHost:DialogHost>
+            <!-- Status bar -->
+            <DockPanel Grid.Row="1" LastChildFill="True">
+                <ProgressBar x:Name="ProgressBar" Width="120" Height="16" IsIndeterminate="False" />
+                <TextBlock x:Name="StatusTextBlock" VerticalAlignment="Center" Text="Ready" TextWrapping="Wrap" Margin="10,0" />
+            </DockPanel>
+        </Grid>
+    </dialogHost:DialogHost>
 </Window>
