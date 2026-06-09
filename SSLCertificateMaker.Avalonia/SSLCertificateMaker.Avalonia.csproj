@@ -8,7 +8,7 @@
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 		<AssemblyTitle>SSLCertificateMaker</AssemblyTitle>
-		<AssemblyName>SSLCertificateMaker.Avalonia</AssemblyName>
+		<AssemblyName>SSLCertificateMaker</AssemblyName>
 		<Product>SSL-Certificate Maker</Product>
 		<Copyright>Copyright © 2026</Copyright>
 		<OutputType Condition="$(TagretFramework) != 'netstandard2.0'">WinExe</OutputType>
@@ -93,7 +93,7 @@
 		<PackageReference Include="AvaloniaDialogs" Version="3.7.1" />
 		<PackageReference Include="Xaml.Behaviors.Interactions" Version="12.0.0.1" />
         <PackageReference Include="Xaml.Behaviors.Interactivity" Version="12.0.0.1" />
-		<!--<PackageReference Include="DotnetRuntimeBootstrapper" Version="2.5.4" />-->
+		<PackageReference Include="DotnetRuntimeBootstrapper" Version="2.5.4" />
         <PackageReference Condition="$(PackAsTool) == 'true'" Include="GUIToolInstaller" Version="1.0.16" />
 	</ItemGroup>
 
