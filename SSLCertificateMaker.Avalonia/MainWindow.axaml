@@ -42,12 +42,12 @@
                                 <ComboBox Grid.Column="0" x:Name="IssuerCombo" HorizontalAlignment="Stretch" />
                                 <StackPanel x:Name="CopyIssuerTip"  Grid.Column="1" ToolTip.Tip="Copy Certificate to Clipboard (To copy over RDP, if you run another remote SSL-Certificate-Maker instance in RDP)">
                                     <Button x:Name="CopyIssuerButton">
-                                        <Image x:Name="CopyIssuerImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/upload.png" />
+                                        <Image x:Name="CopyIssuerImage" Height="18" Width="18" Source="avares://SSLCertificateMaker/Resources/upload.png" />
                                     </Button>
                                 </StackPanel>
                                 <StackPanel x:Name="PasteIssuerTip" Grid.Column="2" ToolTip.Tip="Save Certificate from Clipboard (To copy over RDP, if you run another remote SSL-Certificate-Maker instance in RDP)">
                                     <Button x:Name="PasteIssuerButton">
-                                        <Image x:Name="PasteIssuerImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/download.png" />
+                                        <Image x:Name="PasteIssuerImage" Height="18" Width="18" Source="avares://SSLCertificateMaker/Resources/download.png" />
                                     </Button>
                                 </StackPanel>
 
@@ -77,7 +77,7 @@
                             <StackPanel Grid.Row="3" Grid.Column="1">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Button x:Name="KeyUsageEditButton">
-                                        <Image x:Name="PenImage1" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/pen.png" />
+                                        <Image x:Name="PenImage1" Height="18" Width="18" Source="avares://SSLCertificateMaker/Resources/pen.png" />
                                     </Button>
                                     <TextBlock x:Name="txtKeyUsage" TextWrapping="Wrap" VerticalAlignment="Center" />
                                 </StackPanel>
@@ -98,7 +98,7 @@
                             <StackPanel Grid.Row="4" Grid.Column="1">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <Button x:Name="ExtendedKeyUsageEditButton">
-                                        <Image x:Name="PenImage2" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/pen.png" />
+                                        <Image x:Name="PenImage2" Height="18" Width="18" Source="avares://SSLCertificateMaker/Resources/pen.png" />
                                     </Button>
                                     <TextBlock x:Name="txtExtendedKeyUsage" TextWrapping="Wrap" VerticalAlignment="Center" />
                                 </StackPanel>
@@ -118,7 +118,7 @@
                             <TextBlock Grid.Row="5" Grid.Column="0" Text="Advanced:" VerticalAlignment="Center" />
                             <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" Spacing="8">
                                 <Button x:Name="AdvancedEditButton">
-                                    <Image x:Name="PenImage3" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/pen.png" />
+                                    <Image x:Name="PenImage3" Height="18" Width="18" Source="avares://SSLCertificateMaker/Resources/pen.png" />
                                 </Button>
                             </StackPanel>
                             <Border x:Name="AdvancedBox" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
@@ -188,12 +188,12 @@
                             <ComboBox x:Name="CertificateCombo" HorizontalAlignment="Stretch" />
                             <StackPanel x:Name="CopyCertTip" Grid.Column="1" ToolTip.Tip="Copy Certificate to Clipboard (To copy over RDP, if you run another remote SSL-Certificate-Maker instance in RDP)">
                                 <Button x:Name="CopyCertButton">
-                                    <Image x:Name="CopyCertImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/upload.png" />
+                                    <Image x:Name="CopyCertImage" Height="18" Width="18" Source="avares://SSLCertificateMaker/Resources/upload.png" />
                                 </Button>
                             </StackPanel>
                             <StackPanel x:Name="PasteCertTip" Grid.Column="2" ToolTip.Tip="Save Certificate from Clipboard (To copy over RDP, if you run another remote SSL-Certificate-Maker instance in RDP)">
                                 <Button x:Name="PasteCertButton">
-                                    <Image x:Name="PasteCertImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/download.png" />
+                                    <Image x:Name="PasteCertImage" Height="18" Width="18" Source="avares://SSLCertificateMaker/Resources/download.png" />
                                 </Button>
                             </StackPanel>
                         </Grid>
@@ -254,7 +254,7 @@
             
             <!-- Menu <StackPanel Grid.Row="0">
                 <Button x:Name="MenuButton" HorizontalAlignment="Right">
-                    <Image x:Name="MenuImage" Height="18" Width="18" Source="avares://SSLCertificateMaker.Avalonia/Resources/menu-white.png" />
+                    <Image x:Name="MenuImage" Height="18" Width="18" Source="avares://SSLCertificateMaker/Resources/menu-white.png" />
                 </Button>
                 <Border x:Name="ContextMenu" HorizontalAlignment="Right" ZIndex="100"
                         Background="#fff3f3f3">

@@ -93,7 +93,7 @@
 		<PackageReference Include="AvaloniaDialogs" Version="3.7.1" />
 		<PackageReference Include="Xaml.Behaviors.Interactions" Version="12.0.0.1" />
         <PackageReference Include="Xaml.Behaviors.Interactivity" Version="12.0.0.1" />
-		<!--<PackageReference Include="DotnetRuntimeBootstrapper" Version="2.5.4" />-->
+		<PackageReference Include="DotnetRuntimeBootstrapper" Version="2.5.4" />
         <PackageReference Condition="$(PackAsTool) == 'true'" Include="GUIToolInstaller" Version="1.0.16" />
 	</ItemGroup>
 
@@ -145,4 +145,11 @@
 	  <EmbeddedResource Include="Installer\Resources\cert.png" />
 	</ItemGroup>
 
+    <ItemGroup Condition="$(PackAsTool) != 'true'">
+        <None Include="$(OutputPath)\net10.0\SSLCertificateMaker.exe" Pack="true" PackagePath="buildTransitive\" />
+        <None Include="$(OutputPath)\net10.0\SSLCertificateMaker.runtimeconfig.json" Pack="true" PackagePath="buildTransitive\" />
+        <None Include="$(OutputPath)\net10.0\SSLCertificateMaker.deps.json" Pack="true" PackagePath="buildTransitive\" />
+        <None Include="buildTransitive\SSLCertificateMaker.UI.targets" Pack="true"
+			PackagePath="buildTransitive\" /> 
+    </ItemGroup>
 </Project>

@@ -406,73 +406,73 @@ namespace SSLCertificateMaker.Avalonia
                 var isDark = Application.Current?.ActualThemeVariant == ThemeVariant.Dark;
                 if (isDark)
                 {
-                    PenImage1.Source = PenImage2.Source = PenImage3.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/pen-white.png")));
+                    PenImage1.Source = PenImage2.Source = PenImage3.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/pen-white.png")));
                     if (CopyIssuerButton.IsEnabled)
                     {
-                        CopyIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload-white.png")));
+                        CopyIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/upload-white.png")));
                     } else
                     {
-                        CopyIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload-gray.png")));
+                        CopyIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/upload-gray.png")));
                     }
                     if (PasteIssuerButton.IsEnabled)
                     {
-                        PasteIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download-white.png")));
+                        PasteIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/download-white.png")));
                     }
                     else
                     {
-                        PasteIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download-gray.png")));
+                        PasteIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/download-gray.png")));
                     }
                     if (CopyCertButton.IsEnabled)
                     {
-                        CopyCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload-white.png")));
+                        CopyCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/upload-white.png")));
                     }
                     else
                     {
-                        CopyCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload-gray.png")));
+                        CopyCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/upload-gray.png")));
                     }
                     if (PasteCertButton.IsEnabled)
                     {
-                        PasteCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download-white.png")));
+                        PasteCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/download-white.png")));
                     }
                     else
                     {
-                        PasteCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download-gray.png")));
+                        PasteCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/download-gray.png")));
                     }
                 }
                 else
                 {
-                    PenImage1.Source = PenImage2.Source = PenImage3.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/pen.png")));
+                    PenImage1.Source = PenImage2.Source = PenImage3.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/pen.png")));
                     if (CopyIssuerButton.IsEnabled)
                     {
-                        CopyIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload.png")));
+                        CopyIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/upload.png")));
                     }
                     else
                     {
-                        CopyIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload-gray.png")));
+                        CopyIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/upload-gray.png")));
                     }
                     if (PasteIssuerButton.IsEnabled)
                     {
-                        PasteIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download.png")));
+                        PasteIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/download.png")));
                     }
                     else
                     {
-                        PasteIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download-gray.png")));
+                        PasteIssuerImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/download-gray.png")));
                     }
                     if (CopyCertButton.IsEnabled)
                     {
-                        CopyCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload.png")));
+                        CopyCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/upload.png")));
                     }
                     else
                     {
-                        CopyCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/upload-gray.png")));
+                        CopyCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/upload-gray.png")));
                     }
                     if (PasteCertButton.IsEnabled)
                     {
-                        PasteCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download.png")));
+                        PasteCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/download.png")));
                     }
                     else
                     {
-                        PasteCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker.Avalonia/Resources/download-gray.png")));
+                        PasteCertImage.Source = new Bitmap(AssetLoader.Open(new Uri("avares://SSLCertificateMaker/Resources/download-gray.png")));
                     }
                 }
                 PopulateRevokeItems();

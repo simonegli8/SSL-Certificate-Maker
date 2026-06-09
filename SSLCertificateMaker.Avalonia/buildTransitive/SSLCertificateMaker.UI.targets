@@ -1,0 +1,18 @@
+<Project>
+
+    <Target Name="CopySSLCertMakerExe"
+        AfterTargets="Build">
+
+        <ItemGroup>
+            <_SSLCertExe Include="$(MSBuildThisFileDirectory)SSLCertificateMaker.exe" />
+            <_SSLCertExe Include="$(MSBuildThisFileDirectory)SSLCertificateMaker.deps.json" />
+            <_SSLCertExe Include="$(MSBuildThisFileDirectory)SSLCertificateMaker.runtimeconfig.json" />
+        </ItemGroup>
+                
+        <Copy SourceFiles="@(_SSLCertExe)"
+              DestinationFolder="$(TargetDir)"
+              SkipUnchangedFiles="true" />
+
+    </Target>
+
+</Project>
