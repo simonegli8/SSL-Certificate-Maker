@@ -37,7 +37,7 @@
 		<ToolCommandName>sslcertmaker</ToolCommandName>
 		<PackageOutputPath>../nupkg</PackageOutputPath>
         <RestoreSources>$(RestoreSources);..\nupkg;https://api.nuget.org/v3/index.json</RestoreSources>
-        <DebugType>embedded</DebugType>
+        <DebugType>portable</DebugType>
     </PropertyGroup>
 
     <PropertyGroup Condition="$(PackAsTool) == 'true'">
@@ -55,11 +55,14 @@
 		<None Remove="pen-white.png" />
 		<None Remove="pen.png" />
 		<None Remove="pen.svg" />
+		<None Remove="Resources\cert.png" />
 		<None Remove="Resources\download-gray.png" />
 		<None Remove="Resources\download-white.png" />
 		<None Remove="Resources\download.png" />
 		<None Remove="Resources\menu-white.png" />
 		<None Remove="Resources\menu.png" />
+		<None Remove="Resources\SSLCertificateMaker.icns" />
+		<None Remove="Resources\SSLCertificateMaker.png" />
 		<None Remove="Resources\upload-gray.png" />
 		<None Remove="Resources\upload-white.png" />
 		<None Remove="Resources\upload.png" />
@@ -94,7 +97,7 @@
 		<PackageReference Include="Xaml.Behaviors.Interactions" Version="12.0.5" />
         <PackageReference Include="Xaml.Behaviors.Interactivity" Version="12.0.5" />
 		<PackageReference Include="DotnetRuntimeBootstrapper" Version="2.5.4" />
-        <PackageReference Condition="$(PackAsTool) == 'true'" Include="GUIToolInstaller" Version="1.0.16" />
+        <PackageReference Condition="$(PackAsTool) == 'true'" Include="GUIToolInstaller" Version="1.0.18" />
 	</ItemGroup>
 
     <ItemGroup Condition="$(PackAsTool) == 'true'">
@@ -119,7 +122,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<EmbeddedResource Include="Resources\SSLCertificateMaker.ico" />
 		<Content Include="Resources\cert.ico" />
+		<Content Include="Resources\cert.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -143,13 +148,14 @@
 	  <EmbeddedResource Include="Installer\Resources\cert.icns" />
 	  <EmbeddedResource Include="Installer\Resources\cert.ico" />
 	  <EmbeddedResource Include="Installer\Resources\cert.png" />
+	  <EmbeddedResource Include="Resources\SSLCertificateMaker.icns" />
+	  <EmbeddedResource Include="Resources\SSLCertificateMaker.png" />
 	</ItemGroup>
 
     <ItemGroup Condition="$(PackAsTool) != 'true'">
         <None Include="$(OutputPath)\net10.0\SSLCertificateMaker.exe" Pack="true" PackagePath="buildTransitive\" />
         <None Include="$(OutputPath)\net10.0\SSLCertificateMaker.runtimeconfig.json" Pack="true" PackagePath="buildTransitive\" />
         <None Include="$(OutputPath)\net10.0\SSLCertificateMaker.deps.json" Pack="true" PackagePath="buildTransitive\" />
-        <None Include="buildTransitive\SSLCertificateMaker.UI.targets" Pack="true"
-			PackagePath="buildTransitive\" /> 
+        <None Include="buildTransitive\SSLCertificateMaker.UI.targets" Pack="true" PackagePath="buildTransitive\" /> 
     </ItemGroup>
 </Project>
