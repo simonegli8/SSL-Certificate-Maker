@@ -61,8 +61,6 @@
 		<None Remove="Resources\download.png" />
 		<None Remove="Resources\menu-white.png" />
 		<None Remove="Resources\menu.png" />
-		<None Remove="Resources\SSLCertificateMaker.icns" />
-		<None Remove="Resources\SSLCertificateMaker.png" />
 		<None Remove="Resources\upload-gray.png" />
 		<None Remove="Resources\upload-white.png" />
 		<None Remove="Resources\upload.png" />
@@ -122,9 +120,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Resources\SSLCertificateMaker.ico" />
-		<Content Include="Resources\cert.ico" />
-		<Content Include="Resources\cert.png" />
+		<EmbeddedResource Include="Resources\cert.ico" />
+		<EmbeddedResource Include="Resources\cert.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -148,8 +145,7 @@
 	  <EmbeddedResource Include="Installer\Resources\cert.icns" />
 	  <EmbeddedResource Include="Installer\Resources\cert.ico" />
 	  <EmbeddedResource Include="Installer\Resources\cert.png" />
-	  <EmbeddedResource Include="Resources\SSLCertificateMaker.icns" />
-	  <EmbeddedResource Include="Resources\SSLCertificateMaker.png" />
+	  <EmbeddedResource Include="Resources\cert.icns" />
 	</ItemGroup>
 
     <ItemGroup Condition="$(PackAsTool) != 'true'">
