@@ -1,4 +1,4 @@
-SET PackageVersion=4.1.5
+SET PackageVersion=4.1.6
 SET Configuration=Release
 
 del nupkg\SSLCertificateMaker*.nupkg
