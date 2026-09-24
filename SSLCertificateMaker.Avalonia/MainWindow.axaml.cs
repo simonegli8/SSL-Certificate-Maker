@@ -203,7 +203,7 @@ namespace SSLCertificateMaker.Avalonia
         bool isOpen = true;
         private void InitializeUi()
         {
-            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
             var version = typeof(MainWindow).Assembly.GetName().Version;
             Title += $" {version!.ToString(3)}";
