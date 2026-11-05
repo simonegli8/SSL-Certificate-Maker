@@ -1,0 +1,6 @@
+<Project>
+    <PropertyGroup>
+        <netlib>11.0.0-rc.3.26522.148</netlib>
+        <netlatest>net11.0</netlatest>
+    </PropertyGroup>
+</Project>
